@@ -40,8 +40,8 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateStatus(orderId, newStatus));
     }
 
-//    @GetMapping("/status/{status}")
-//    public ResponseEntity<List<OrderResponse>> getOrdersByStatus(@PathVariable String status){
-//        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
-//    }
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<OrderResponse>> getOrdersByStatus(@PathVariable String status){
+        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
+    }
 }
