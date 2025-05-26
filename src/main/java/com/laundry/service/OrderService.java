@@ -119,22 +119,22 @@ public class OrderService {
 
 
 
-//    public List<OrderResponse> getOrdersByStatus(String status){
-//        List<Order> orders=orderRepo.findByStatus(Order.OrderStatus.valueOf(status));
-//        List<OrderResponse> responses=new ArrayList<>();
-//            for(Order order:orders){
-//                responses.add(OrderResponse.builder()
-//                        .id(order.getId())
-//                        .customerName(order.getCustomer().getName())
-//                        .customerPhone(order.getCustomer().getPhoneNumber())
-//                        .totalClothes(order.getTotalClothes())
-//                        .totalAmount(order.getTotalAmount())
-//                        .serviceType(order.getServiceType().name())
-//                        .status(order.getStatus().name())
-//                        .build());
-//            }
-//            return responses;
-//    }
+    public List<OrderResponse> getOrdersByStatus(String status){
+        List<Order> orders=orderRepo.findByStatus(Order.OrderStatus.valueOf(status));
+        List<OrderResponse> responses=new ArrayList<>();
+            for(Order order:orders){
+                responses.add(OrderResponse.builder()
+                        .id(order.getId())
+                        .customerName(order.getCustomer().getName())
+                        .customerPhone(order.getCustomer().getPhoneNumber())
+                        .totalClothes(order.getTotalClothes())
+                        .totalAmount(order.getTotalAmount())
+                        .serviceType(order.getServiceType().name())
+                        .status(order.getStatus().name())
+                        .build());
+            }
+            return responses;
+    }
 
 
 //    public double calculateDailyRevenue(LocalDate date) {

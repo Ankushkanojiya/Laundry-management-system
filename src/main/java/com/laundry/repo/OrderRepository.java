@@ -13,7 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findAllByOrderByOrderDateDesc();
 
-//    List<Order> findByStatus(Order.OrderStatus status);
+    List<Order> findByStatus(Order.OrderStatus status);
 
 
 //    List<Order> findByStatus(OrderStatus status); // For filtering

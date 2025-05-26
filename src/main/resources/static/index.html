@@ -25,7 +25,18 @@
         <button onclick="showTakeOrder()">Take Order</button>
         <button onclick="showManageCustomers()">Manage Customers</button>
         <button onclick="showManageOrders()">Show Orders</button>
+    </div>
 
+    <!-- Dashboard-->
+    <div id="stats-cards" class="dashboard-cards">
+        <div class="card pending-card">
+            <h3>Pending Orders</h3>
+            <p id="pending-count">0</p>
+        </div>
+        <div class="card revenue-card">
+            <h3>Today's Revenue</h3>
+            <p id="daily-revenue">₹0</p>
+        </div>
     </div>
 
     <!-- Add Customer Section -->
@@ -53,8 +64,6 @@
                 <input type="radio" name="serviceType" value="LAUNDRY">
                 🧥 Dry Cleaning
             </label>
-
-
         </div>
 
         <div class="form-section">
@@ -114,6 +123,7 @@
         </div>
     </div>
 </div>
+
 
 
 <!-- Order Confirmation Popup -->
