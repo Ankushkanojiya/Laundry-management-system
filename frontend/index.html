@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laundry Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+
+</head>
+<body>
+<h1>Laundry Management System</h1>
+
+<!-- Login Section -->
+<div id="login-section" class="form-section">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()" >Login</button>
+    <p id="login-message"></p>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="admin-dashboard" class="hidden">
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="showAddCustomer()">Add Customer</button>
+        <button onclick="showTakeOrder()">Take Order</button>
+        <button onclick="showManageCustomers()">Manage Customers</button>
+        <button onclick="showManageOrders()">Show Orders</button>
+    </div>
+
+    <!-- Dashboard-->
+    <div id="stats-cards" class="dashboard-cards">
+        <div class="card pending-card">
+            <h3>Pending Orders</h3>
+            <p id="pending-count">0</p>
+        </div>
+        <div class="card revenue-card">
+            <h3>Today's Revenue</h3>
+            <p id="daily-revenue">₹0</p>
+        </div>
+    </div>
+
+    <!-- Add Customer Section -->
+    <div id="add-customer-section" class="hidden">
+        <h2>Add New Customer</h2>
+        <div class="form-section">
+            <input type="text" id="customer-name" placeholder="Full Name" required>
+            <input type="text" id="customer-phone" placeholder="Phone Number (10 digits)" required>
+            <button id="add-btn" onclick="addCustomer()">Add Customer</button>
+            <p id="action-message"></p>
+        </div>
+    </div>
+
+    <!-- Take Order Section -->
+    <div id="take-order-section" class="hidden">
+        <h2>Take New Order</h2>
+
+        <div class="service-type-section">
+            <label>Service Type:</label>
+            <label>
+                <input type="radio" name="serviceType" value="REGULAR" checked>
+                👕 Regular Wash
+            </label>
+            <label>
+                <input type="radio" name="serviceType" value="LAUNDRY">
+                🧥 Dry Cleaning
+            </label>
+        </div>
+
+        <div class="form-section">
+            <select id="customer-select">
+                <option value="">Select Customer</option>
+            </select>
+            <input type="number" id="cloth-count" placeholder="Number of Clothes" min="1">
+            <button onclick="submitOrder()">Create Order</button>
+        </div>
+    </div>
+
+    <!-- Manage Customers Section -->
+    <div id="manage-customers-section" class="hidden">
+        <h2>Customer List</h2>
+
+        <div id="edit-customer-form" class="hidden">
+            <h3>Edit Customer</h3>
+            <input type="text" id="edit-customer-name" placeholder="Full Name" required>
+            <input type="text" id="edit-customer-phone" placeholder="Phone Number" required>
+            <button onclick="updateCustomer()">Save Changes</button>
+            <button onclick="cancelEdit()">Cancel</button>
+            <p id="edit-customer-message"></p>
+        </div>
+        <div class="form-section">
+            <table id="customer-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+
+     <!-- Show order section -->
+    <div id="manage-order-section" class="hidden">
+        <h2>Orders</h2>
+        <div class="form-section">
+            <table id="orders-table">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Order Confirmation Popup -->
+<div id="order-popup" class="hidden">
+    <div class="popup-content">
+        <h3>Order Created Successfully! 🎉</h3>
+        <p><strong>Order ID:</strong> <span id="popup-order-id"></span></p>
+        <p><strong>Customer Name:</strong> <span id="popup-customer-name"></span></p>
+        <p><strong>Phone Number:</strong> <span id="popup-customer-phone"></span></p>
+        <p><strong>Number of Clothes:</strong> <span id="popup-cloth-count"></span></p>
+        <p><strong>Total Amount:</strong> ₹<span id="popup-total-amount"></span></p>
+        <p><strong>Order Date:</strong> <span id="popup-order-date"></span></p>
+        <p><strong>Status:</strong> <span id="popup-status">PENDING</span></p>
+        <button onclick="closeOrderPopup()">Close</button>
+    </div>
+</div>
+</body>
+</html>

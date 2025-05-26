@@ -4,20 +4,17 @@ import com.laundry.dto.LoginRequest;
 import com.laundry.model.Admin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.laundry.repo.AdminRepository;
 
-
+@RequestMapping("/api/login")
 @RestController
 public class AuthenticationController {
 
     @Autowired
     private AdminRepository adminRepo;
 
-    @PostMapping("/login")
+    @PostMapping
     public ResponseEntity<String> login(@RequestBody LoginRequest request) {
         Admin admin = adminRepo.findByUsername(request.getUsername());
         if (admin != null && admin.getPassword().equals(request.getPassword())) {

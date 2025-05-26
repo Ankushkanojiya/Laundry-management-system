@@ -13,7 +13,6 @@ input { padding: 8px; margin: 5px; width: 250px; }
     display: none;
 }
 
-
 .loading-spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-radius: 50%;
@@ -191,3 +190,4 @@ input[type="radio"] {
     margin: 0;
     font-weight: bold;
 }
+    
