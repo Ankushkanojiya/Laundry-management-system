@@ -114,33 +114,32 @@ select {
 .in-progress { background: #4CAF50; color: white; }
 .completed { background: #808080; color: white; }
 
+/* Service css */
 
-/* Replace your existing radio button styles with this */
 .service-type-options {
     margin: 10px 0;
     display: flex;
-    gap: 50px; /* Reduced gap between options */
+    gap: 50px; 
 }
 
 .service-type-options label {
-    display: flex; /* Changed to inline-flex */
+    display: flex; 
     align-items: center;
-    gap: 10px; /* Tightened space between radio and text */
     cursor: pointer;
-    white-space: nowrap; /* Prevents text wrapping */
+    white-space: nowrap; 
     padding: 5px 8px;
     border-radius: 4px;
     transition: background 0.2s;
 }
 
-/* Hover effect for better UX */
+
 .service-type-options label:hover {
     background: #f0f0f0;
 }
 
-/* Radio button styling */
+
 input[type="radio"] {
-    margin: 0; /* Removes default margin */
+    margin: 0; 
     width: 16px;
     height: 16px;
     cursor: pointer;
@@ -153,7 +152,7 @@ input[type="radio"] {
     transform: scale(1.2);
 }
 
-/* ######################################################################################33333 */
+/* Dashboard cards css */
 
 .dashboard-cards {
     display: grid;
@@ -191,3 +190,38 @@ input[type="radio"] {
     font-weight: bold;
 }
     
+
+/* Filter sidebar css */
+
+.order-module {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.filter-sidebar {
+    flex: 0 0 250px; 
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 20px; 
+}
+
+.form-section { 
+    flex: 1;
+    overflow-x: auto; 
+}
+
+ /* Responsive layout  */
+@media (max-width: 768px) {
+    .order-module {
+        flex-direction: column;
+    }
+    
+    .filter-sidebar {
+        width: 100%;
+        position: static;
+    }
+}

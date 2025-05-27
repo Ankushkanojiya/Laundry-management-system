@@ -1,24 +1,23 @@
 //   Login  🔒
 
-const BASE_URL = 'http://localhost:8080'; // Update if needed
+const BASE_URL = 'http://localhost:8080'; 
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadStats();
-});
+
+document.addEventListener('DOMContentLoaded', loadStats());
+document.addEventListener('DOMContentLoaded', populateCustomerFilter());
+
 
 
 async function loadStats() {
 
+    try {
+        const response = await fetch(`${BASE_URL}/api/stats`);
+        const data = await response.json();
 
-    try{
-        const response=await fetch(`${BASE_URL}/api/stats`);
-        const data=await response.json();
-
-        document.getElementById('pending-count').textContent=data.pendingOrders;
-        document.getElementById('daily-revenue').textContent=`₹${data.revenueToday.toFixed(2)}`;
-    }catch(error){
-        console.error("Something Going wrong",error);
+        document.getElementById('pending-count').textContent = data.pendingOrders;
+        document.getElementById('daily-revenue').textContent = `₹${data.revenueToday.toFixed(2)}`;
+    } catch (error) {
+        console.error("Something Going wrong", error);
     }
 }
 
@@ -208,13 +207,11 @@ function showMessage(message, type = 'info', elementId = 'action-message') {
     }
 }
 
-//  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-//    Navigation button to Take order
 function showTakeOrder() {
-    document.getElementById('order-section').classList.remove('hidden');
-    document.getElementById('customer-table').classList.add('hidden');
-    loadCustomersForOrder();
+    hideAllSections();
+    document.getElementById('take-order-section').classList.remove('hidden');
+    loadCustomersForOrder(); // Load customers in dropdown
 }
 
 //  populate the customer in Take order
@@ -222,7 +219,7 @@ async function loadCustomersForOrder() {
     try {
         const response = await fetch(`${BASE_URL}/api/customers`);
         const customers = await response.json();
-        const select = document.getElementById('customer-select');
+        const select = document.getElementById('customer-select', '');
 
         select.innerHTML = '<option value="">Select Customer</option>';
         customers.forEach(customer => {
@@ -292,8 +289,6 @@ function resetOrderForm() {
 }
 
 
-
-// Add navigation buttons
 function addNavigationButtons() {
     const nav = document.createElement('div');
     nav.innerHTML = `
@@ -310,25 +305,15 @@ function showCustomerManagement() {
     document.getElementById('customer-table').classList.remove('hidden');
 }
 
-//!@#$%^&*()_)(*&^%$#%^*(*&&&&&&&&&&&&&&&&&&&&########################$@@@@@@@@@@@@@
-//!!@#$%^((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-
-
 function showAddCustomer() {
     hideAllSections();
     document.getElementById('add-customer-section').classList.remove('hidden');
 }
 
-function showTakeOrder() {
-    hideAllSections();
-    document.getElementById('take-order-section').classList.remove('hidden');
-    loadCustomersForOrder(); // Load customers in dropdown
-}
-
 function showManageCustomers() {
     hideAllSections();
     document.getElementById('manage-customers-section').classList.remove('hidden');
-    refreshCustomers(); // Refresh customer list
+    refreshCustomers(); 
 }
 
 function hideAllSections() {
@@ -339,14 +324,44 @@ function hideAllSections() {
 async function showManageOrders() {
     hideAllSections();
     document.getElementById('manage-order-section').classList.remove('hidden');
+    await populateCustomerFilter()
     await refreshOrders();
 }
 
-// All the orders
+
+
+function gatherFilterValues() {
+    return {
+        status: document.getElementById('filter-status').value,
+        customerId: document.getElementById('filter-customer').value,
+        startDate: document.getElementById('filter-start-date').value,
+        endDate: document.getElementById('filter-end-date').value
+    };
+}
+
+async function applyFilters() {
+    refreshOrders();
+}
+async function clearFilters() {
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-customer').value = '';
+    document.getElementById('filter-start-date').value = '';
+    document.getElementById('filter-end-date').value = '';
+    refreshOrders();
+}
 async function refreshOrders() {
     try {
 
-        const response = await fetch(`${BASE_URL}/api/orders`);
+        const filters = gatherFilterValues();
+
+        // this is something new which converts objects into array of [key,value]
+        const cleanFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v !== '' && v !== null)
+        );
+
+        
+
+        const response = await fetch(`${BASE_URL}/api/orders/filter?${new URLSearchParams(cleanFilters)}`);
         if (!response.ok) throw new Error('Failed to load orders');
 
         const orders = await response.json();
@@ -359,7 +374,7 @@ async function refreshOrders() {
         }
 
         orders.forEach(order => {
-            // Status button logic
+            
             let statusCell;
             switch (order.status) {
                 case 'PENDING':
@@ -383,14 +398,14 @@ async function refreshOrders() {
                     statusCell = order.status;
             }
 
-            // Format order date
+            // Format date
             const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
             });
 
-            // Create table row
+            // Create table 
             tbody.innerHTML += `
                 <tr>
                     <td>#${order.id}</td>
@@ -410,8 +425,6 @@ async function refreshOrders() {
         });
 
         loadStats();
-
-
 
     } catch (error) {
         console.error('Order refresh failed:', error);
@@ -435,10 +448,33 @@ async function updateStatus(orderId, newStatus) {
         }
 
         showMessage(`Status updated to ${newStatus}`, 'success');
-        await refreshOrders(); // Refresh the list
+        await refreshOrders(); 
 
     } catch (error) {
         showMessage(error.message, 'error');
     }
 }
+
+async function populateCustomerFilter() {
+    try {
+        const response = await fetch(`${BASE_URL}/api/customers`);
+
+        if (!response.ok) throw new Error("Customer not found");
+        const customers = await response.json();
+
+        const select = document.getElementById('filter-customer', '');
+
+        select.innerHTML = '<option value="">Select customer</option>';
+        customers.forEach(customer => {
+            const option = document.createElement('option');
+            option.value = customer.id;
+            option.textContent = `${customer.name} (${customer.phoneNumber})`;
+            select.appendChild(option);
+        });
+    }catch(error){
+        showMessage("failed to load customer",'error');
+    }
+}
+
+
 
