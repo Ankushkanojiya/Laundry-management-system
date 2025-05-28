@@ -181,6 +181,27 @@
             <button onclick="closeOrderPopup()">Close</button>
         </div>
     </div>
+
+    <!-- Customer Order History -->
+<div id="customer-order-history" class="hidden">
+    <div class="modal-content">
+        <span class="close" onclick="closeHistory()">&times;</span>
+        <h3>Order history for <span id="customer-name"></span></h3>
+        <div class="history-table-container">
+            <table id="customer-orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </body>
 
 </html>

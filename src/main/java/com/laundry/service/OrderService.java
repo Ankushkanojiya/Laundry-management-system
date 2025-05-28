@@ -127,6 +127,7 @@ public class OrderService {
                     .totalClothes(order.getTotalClothes())
                     .totalAmount(order.getTotalAmount())
                     .orderDate(order.getOrderDate())
+                    .serviceType(order.getServiceType().name())
                     .status(order.getStatus().name())
                     .build());
         }

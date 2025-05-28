@@ -1,11 +1,10 @@
 //   Login  🔒
 
-const BASE_URL = 'http://localhost:8080'; 
+const BASE_URL = 'http://localhost:8080';
 
 
 document.addEventListener('DOMContentLoaded', loadStats());
 document.addEventListener('DOMContentLoaded', populateCustomerFilter());
-
 
 
 async function loadStats() {
@@ -23,6 +22,7 @@ async function loadStats() {
 
 // Login function
 async function login() {
+    console.log("Login initiated....");
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
 
@@ -153,6 +153,7 @@ async function deleteCustomer(id) {
     } catch (error) {
         showMessage(error.message, 'error');
     }
+    loadStats();
 }
 
 //  Refresh customer list 🔄🔄🔄🔄
@@ -162,8 +163,13 @@ async function refreshCustomers() {
         const response = await fetch(`${BASE_URL}/api/customers`);
         if (!response.ok) throw new Error('Failed to load customers');
 
+        
         const customers = await response.json();
         const tableBody = document.querySelector('#customer-table tbody');
+        if (customers.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center">No Customers found</td></tr>`;
+            return;
+        }
         tableBody.innerHTML = customers.map(customer => `
                 <tr>
                     <td>${customer.id}</td>
@@ -172,6 +178,8 @@ async function refreshCustomers() {
                     <td>
                         <button onclick="editCustomer(${customer.id})">Edit</button>
                         <button onclick="deleteCustomer(${customer.id})">Delete</button>
+                        <button class="history-btn" 
+                        onclick="viewOrders(${customer.id}, '${customer.name}')">📜 Orders</button>
                     </td>
                 </tr>
             `).join('');
@@ -313,7 +321,7 @@ function showAddCustomer() {
 function showManageCustomers() {
     hideAllSections();
     document.getElementById('manage-customers-section').classList.remove('hidden');
-    refreshCustomers(); 
+    refreshCustomers();
 }
 
 function hideAllSections() {
@@ -359,7 +367,7 @@ async function refreshOrders() {
             Object.entries(filters).filter(([_, v]) => v !== '' && v !== null)
         );
 
-        
+
 
         const response = await fetch(`${BASE_URL}/api/orders/filter?${new URLSearchParams(cleanFilters)}`);
         if (!response.ok) throw new Error('Failed to load orders');
@@ -374,7 +382,7 @@ async function refreshOrders() {
         }
 
         orders.forEach(order => {
-            
+
             let statusCell;
             switch (order.status) {
                 case 'PENDING':
@@ -448,7 +456,7 @@ async function updateStatus(orderId, newStatus) {
         }
 
         showMessage(`Status updated to ${newStatus}`, 'success');
-        await refreshOrders(); 
+        await refreshOrders();
 
     } catch (error) {
         showMessage(error.message, 'error');
@@ -471,10 +479,59 @@ async function populateCustomerFilter() {
             option.textContent = `${customer.name} (${customer.phoneNumber})`;
             select.appendChild(option);
         });
-    }catch(error){
-        showMessage("failed to load customer",'error');
+    } catch (error) {
+        showMessage("failed to load customer", 'error');
     }
 }
 
+async function viewOrders(customerId, customerName) {
+    try {
+        console.log('Opening history for:', customerName);
+        document.getElementById('customer-name').textContent = customerName;
+        const modal = document.getElementById('customer-order-history');
+        modal.classList.remove('hidden');
+        modal.classList.add('modal--active');
+
+        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
+        if (!response.ok) throw new Error("Failed to fetch");
+
+        const orders = await response.json();
+        renderCustomerOrders(orders)
+    } catch (error) {
+        showMessage(`Error loading history: ${error.message}`, 'error');
+        closeHistory();
+    }
+}
+
+
+function renderCustomerOrders(orders) {
+    const tbody = document.querySelector('#customer-orders-table tbody');
+
+    
+    if (orders.length===0) {
+        tbody.innerHTML=`<tr>
+            <td colspan="5" style="text-align:center">No orders found</td>
+        </tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = orders.map(order => `
+        <tr class="history-order-row">
+            <td>#${order.id}</td>
+            <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+            <td><span class="status-badge ${order.status.toLowerCase()}">
+                ${order.status.replace('_', ' ')}
+            </span></td>
+            <td>${order.totalClothes} items (₹${order.totalAmount})</td>
+        </tr>
+    `).join('');
+}
+
+function closeHistory() {
+    const modal = document.getElementById('customer-order-history');
+    modal.classList.add('hidden');
+    modal.classList.remove('modal--active');
+
+}
 
 
