@@ -329,6 +329,7 @@ input[type="radio"] {
     letter-spacing: 0.3px;
     font-family: 'Segoe UI', Roboto, sans-serif;
     background: linear-gradient(to right, #539403, #30780e);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     

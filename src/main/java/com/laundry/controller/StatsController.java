@@ -26,10 +26,13 @@ public class StatsController {
     public ResponseEntity<Map<String, Object>> getStats(){
         long pendingOrders= orderRepo.countByStatus(Order.OrderStatus.PENDING);
         double revenueToday=orderRepo.sumOfRevenueToday(LocalDate.now());
+        double businessRevenueToday=orderRepo.sumOfBusinessRevenueToday(LocalDate.now());
 
         return ResponseEntity.ok(Map.of(
                 "pendingOrders",pendingOrders,
+                "businessRevenueToday",businessRevenueToday,
                 "revenueToday",revenueToday
+
         ));
     }
 }

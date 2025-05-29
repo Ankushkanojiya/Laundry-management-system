@@ -14,7 +14,9 @@ async function loadStats() {
         const data = await response.json();
 
         document.getElementById('pending-count').textContent = data.pendingOrders;
+        document.getElementById('business-revenue').textContent=`₹${data.businessRevenueToday.toFixed(2)}`;
         document.getElementById('daily-revenue').textContent = `₹${data.revenueToday.toFixed(2)}`;
+        
     } catch (error) {
         console.error("Something Going wrong", error);
     }
