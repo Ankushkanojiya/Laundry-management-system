@@ -327,3 +327,20 @@ input[type="radio"] {
     align-items: center;
 }
 
+/* Status buttons in modal */
+.action-cell {
+    text-align: center;
+    width: 100px;
+}
+
+.status-btn.small {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    margin: 2px;
+}
+
+
+.action-cell button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}

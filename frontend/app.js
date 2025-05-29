@@ -163,7 +163,7 @@ async function refreshCustomers() {
         const response = await fetch(`${BASE_URL}/api/customers`);
         if (!response.ok) throw new Error('Failed to load customers');
 
-        
+
         const customers = await response.json();
         const tableBody = document.querySelector('#customer-table tbody');
         if (customers.length === 0) {
@@ -442,6 +442,7 @@ async function refreshOrders() {
 
 // Status update function
 async function updateStatus(orderId, newStatus) {
+    await updateOrderStatus(orderId, newStatus, false);
     if (!confirm(`Change order status to ${newStatus}?`)) return;
 
     try {
@@ -484,10 +485,17 @@ async function populateCustomerFilter() {
     }
 }
 
+let currentCustomerInModal = {
+    id: null,
+    name: null
+};
+
 async function viewOrders(customerId, customerName) {
     try {
         console.log('Opening history for:', customerName);
+        currentCustomerInModal = { id: customerId, name: customerName };
         document.getElementById('customer-name').textContent = customerName;
+
         const modal = document.getElementById('customer-order-history');
         modal.classList.remove('hidden');
         modal.classList.add('modal--active');
@@ -506,25 +514,92 @@ async function viewOrders(customerId, customerName) {
 
 function renderCustomerOrders(orders) {
     const tbody = document.querySelector('#customer-orders-table tbody');
+    tbody.innerHTML = '';
 
-    
-    if (orders.length===0) {
-        tbody.innerHTML=`<tr>
+    if (orders.length === 0) {
+        tbody.innerHTML = `<tr>
             <td colspan="5" style="text-align:center">No orders found</td>
         </tr>`;
         return;
     }
-    
-    tbody.innerHTML = orders.map(order => `
-        <tr class="history-order-row">
-            <td>#${order.id}</td>
-            <td>${new Date(order.orderDate).toLocaleDateString()}</td>
-            <td><span class="status-badge ${order.status.toLowerCase()}">
-                ${order.status.replace('_', ' ')}
-            </span></td>
-            <td>${order.totalClothes} items (₹${order.totalAmount})</td>
-        </tr>
-    `).join('');
+
+
+
+    orders.forEach(order => {
+        // Generate status action button based on order status
+        let actionButton = '';
+        switch (order.status) {
+            case 'PENDING':
+                actionButton = `
+                    <button class="status-btn pending small"
+                            onclick="updateOrderStatus(${order.id}, 'IN_PROGRESS', true)">
+                        Start
+                    </button>`;
+                break;
+            case 'IN_PROGRESS':
+                actionButton = `
+                    <button class="status-btn in-progress small"
+                            onclick="updateOrderStatus(${order.id}, 'COMPLETED', true)">
+                        Complete
+                    </button>`;
+                break;
+            case 'COMPLETED':
+                actionButton = `<span class="status-badge completed">Done</span>`;
+                break;
+            default:
+                actionButton = '';
+        }
+
+        const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        tbody.innerHTML += `
+            <tr class="history-order-row">
+                <td>#${order.id}</td>
+                <td>${orderDate}</td>
+                <td>${order.totalClothes} items (₹${order.totalAmount})</td>
+                <td>
+                    <span class="status-badge ${order.status.toLowerCase()}">
+                        ${order.status.replace('_', '-')}
+                    </span>
+                </td>
+                
+                <td class="action-cell">${actionButton}</td>
+            </tr>
+        `;
+    });
+}
+
+async function updateOrderStatus(orderId, newStatus, isInModal = false) {
+    if (!confirm(`Change order status to ${newStatus}?`)) return;
+
+    try {
+        const response = await fetch(
+            `${BASE_URL}/api/orders/${orderId}/status?newStatus=${newStatus}`,
+            { method: 'PATCH' }
+        );
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Status update failed');
+        }
+
+        showMessage(`Status updated to ${newStatus}`, 'success');
+
+        // Refresh the appropriate view
+        if (isInModal && currentCustomerInModal.id) {
+            // Refresh modal view
+            await viewOrders(currentCustomerInModal.id, currentCustomerInModal.name);
+        } else {
+            // Refresh main orders table
+            await refreshOrders();
+        }
+
+    } catch (error) {
+        showMessage(error.message, 'error');
+    }
 }
 
 function closeHistory() {
