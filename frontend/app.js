@@ -642,3 +642,9 @@ function closeHistory() {
 }
 
 
+async function showPayments() {
+    console.log(document.getElementById("manage-payment-section"));
+    hideAllSections();
+    document.getElementById('manage-payment-section').classList.remove('hidden');
+    
+}

@@ -28,6 +28,7 @@
             <button onclick="showTakeOrder()">Take Order</button>
             <button onclick="showManageCustomers()">Manage Customers</button>
             <button onclick="showManageOrders()">Show Orders</button>
+            <button onclick="showPayments()">Payments</button>
         </div>
 
         <!-- Dashboard-->
@@ -166,6 +167,27 @@
                         <tbody></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- show payment section -->
+
+        <div id="manage-payment-section" class="hidden">
+            <h2>Payments</h2>
+            <div class="form-section">
+                <table id="payments-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Clothes</th>
+                            <th>Amount</th>
+                            <th>Details</th>
+                            <th>Pay</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>

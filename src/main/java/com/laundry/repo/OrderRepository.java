@@ -31,7 +31,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "(:endDate IS NULL OR o.orderDate <= :endDate)")
     List<Order> findFilteredOrder(@Param("status") Order.OrderStatus status, @Param("customerId") Long customerId, @Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
 //
-//    @Query("SELECT o FROM Order o WHERE o.orderDate BETWEEN :start AND :end")
-//    List<Order> findOrdersBetweenDates(@Param("start") LocalDate start,
-//                                       @Param("end") LocalDate end);
+
 }
