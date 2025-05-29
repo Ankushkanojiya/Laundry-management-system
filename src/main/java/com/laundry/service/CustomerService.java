@@ -9,7 +9,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +27,19 @@ public class CustomerService {
 
     public CustomerResponse addCustomer(CustomerRequest request){
         // Add phone number validation
-//        if (customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
-//            throw new RuntimeException("Phone number already exists");
-//        }
-        Customer customer=new Customer();
-        customer.setName(request.getName());
-        customer.setPhoneNumber(request.getPhoneNumber());
+        if (customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Phone number already exists"
+            );
+        }
+            Customer customer = new Customer();
+            customer.setName(request.getName());
+            customer.setPhoneNumber(request.getPhoneNumber());
 
+            Customer saveCustomer = customerRepo.save(customer);
+            return mapToResponse(saveCustomer);
 
-        Customer saveCustomer= customerRepo.save(customer);
-
-        return mapToResponse(saveCustomer);
     }
 
     private CustomerResponse mapToResponse(Customer customer) {

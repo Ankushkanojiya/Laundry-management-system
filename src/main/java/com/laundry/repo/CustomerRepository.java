@@ -10,4 +10,5 @@ import java.util.List;
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
     List<Customer> findAll();
 
+    boolean existsByPhoneNumber(String phoneNumber);
 }

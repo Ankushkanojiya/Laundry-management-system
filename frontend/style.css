@@ -153,6 +153,9 @@ select {
 .status-badge.in_progress {
   background: #4CAF50;
   color: white;
+  /* font-size:smaller !important; */
+   white-space: nowrap;       /* Prevent line breaks */
+  word-break: normal;
 }
 
 .pending {
@@ -343,4 +346,16 @@ input[type="radio"] {
 .action-cell button:hover {
     transform: scale(1.05);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+.input-error {
+    border: 2px solid #ee3434;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 56, 96, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 56, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 56, 96, 0); }
 }

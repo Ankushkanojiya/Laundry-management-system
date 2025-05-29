@@ -58,6 +58,8 @@ async function addCustomer() {
 
     const name = document.getElementById('customer-name').value.trim();
     const phone = document.getElementById('customer-phone').value.trim();
+
+
     if (!name || !phone) {
         showMessage('Please fill all fields', 'error');
         return;
@@ -67,20 +69,47 @@ async function addCustomer() {
         showMessage('Phone must be 10 digits', 'error');
         return;
     }
+    try {
+        const response = await fetch(`${BASE_URL}/api/customers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phoneNumber: phone })
+        });
 
-    const response = await fetch(`${BASE_URL}/api/customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phoneNumber: phone })
-    });
+        const responseData = await response.text()
 
-    if (!response.ok) {
-        throw new Error('Failed to add customer');
+        if (!response.ok) {
+            if (response.status === 400 && responseData.includes("already exists")) {
+                showMessage("The number is already exists", 'error');
+                highlightDuplicatePhone();
+                console.warn("Handled 400 error");
+                return;
+            }
+            throw new Error(responseData || 'Failed to add customer');
+            
+            
+        }
+        showMessage('Customer added successfully', 'success');
+        resetForm();
+        await refreshCustomers();
+    } catch (error) {
+        if (error.message.includes("already exists")) {
+            showMessage('Phone number already registered!', 'error');
+            highlightDuplicatePhone();
+        } else {
+            showMessage(error.message, 'error');
+        }
     }
-
-    showMessage('Customer added successfully', 'success');
-    resetForm();
-    await refreshCustomers();
+}
+function highlightDuplicatePhone() {
+    const phoneInput = document.getElementById('customer-phone');
+    phoneInput.classList.add('input-error');
+    
+    
+    // Clear error after 3 seconds
+    setTimeout(() => {
+        phoneInput.classList.remove('input-error');
+    }, 3000);
 }
 
 // <!--   Edit customer  ✍️✍️✍️-->
@@ -389,7 +418,7 @@ async function refreshOrders() {
                     statusCell = `
                         <button class="status-btn pending"
                                 onclick="updateStatus(${order.id}, 'IN_PROGRESS')">
-                            Start Processing
+                            Start
                         </button>`;
                     break;
                 case 'IN_PROGRESS':
@@ -400,7 +429,7 @@ async function refreshOrders() {
                         </button>`;
                     break;
                 case 'COMPLETED':
-                    statusCell = `<span class="status-badge completed">Completed</span>`;
+                    statusCell = `<span class="status-badge completed">Done</span>`;
                     break;
                 default:
                     statusCell = order.status;
@@ -540,7 +569,7 @@ function renderCustomerOrders(orders) {
                 actionButton = `
                     <button class="status-btn in-progress small"
                             onclick="updateOrderStatus(${order.id}, 'COMPLETED', true)">
-                        Complete
+                        Mark Complete
                     </button>`;
                 break;
             case 'COMPLETED':
@@ -562,7 +591,7 @@ function renderCustomerOrders(orders) {
                 <td>${order.totalClothes} items (₹${order.totalAmount})</td>
                 <td>
                     <span class="status-badge ${order.status.toLowerCase()}">
-                        ${order.status.replace('_', '-')}
+                        ${order.status.replace('_', ' ')}
                     </span>
                 </td>
                 
