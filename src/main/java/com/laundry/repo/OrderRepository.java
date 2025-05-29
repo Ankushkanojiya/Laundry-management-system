@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("Select COUNT(o) from Order o where o.status='PENDING' ")
     long countByStatus(Order.OrderStatus status);
 
-    @Query("Select COALESCE(sum(o.totalAmount),0) from Order o where o.orderDate= :date")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'COMPLETED' AND o.orderDate = :date")
     double sumOfRevenueToday(@Param("date")LocalDate date);
 
     @Query("SELECT o FROM Order o WHERE " +

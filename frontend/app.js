@@ -472,7 +472,7 @@ async function refreshOrders() {
 // Status update function
 async function updateStatus(orderId, newStatus) {
     await updateOrderStatus(orderId, newStatus, false);
-    if (!confirm(`Change order status to ${newStatus}?`)) return;
+    // if (!confirm(`Change order status to ${newStatus}?`)) return;
 
     try {
         const response = await fetch(
@@ -599,6 +599,7 @@ function renderCustomerOrders(orders) {
             </tr>
         `;
     });
+    loadStats();
 }
 
 async function updateOrderStatus(orderId, newStatus, isInModal = false) {
