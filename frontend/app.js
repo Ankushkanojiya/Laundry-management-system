@@ -523,7 +523,7 @@ async function viewOrders(customerId, customerName) {
     try {
         console.log('Opening history for:', customerName);
         currentCustomerInModal = { id: customerId, name: customerName };
-        document.getElementById('customer-name').textContent = customerName;
+        document.getElementById('customer-order-history-name').textContent = customerName;
 
         const modal = document.getElementById('customer-order-history');
         modal.classList.remove('hidden');
