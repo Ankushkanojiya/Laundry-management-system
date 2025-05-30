@@ -14,9 +14,9 @@ async function loadStats() {
         const data = await response.json();
 
         document.getElementById('pending-count').textContent = data.pendingOrders;
-        document.getElementById('business-revenue').textContent=`₹${data.businessRevenueToday.toFixed(2)}`;
+        document.getElementById('business-revenue').textContent = `₹${data.businessRevenueToday.toFixed(2)}`;
         document.getElementById('daily-revenue').textContent = `₹${data.revenueToday.toFixed(2)}`;
-        
+
     } catch (error) {
         console.error("Something Going wrong", error);
     }
@@ -88,8 +88,8 @@ async function addCustomer() {
                 return;
             }
             throw new Error(responseData || 'Failed to add customer');
-            
-            
+
+
         }
         showMessage('Customer added successfully', 'success');
         resetForm();
@@ -106,8 +106,8 @@ async function addCustomer() {
 function highlightDuplicatePhone() {
     const phoneInput = document.getElementById('customer-phone');
     phoneInput.classList.add('input-error');
-    
-    
+
+
     // Clear error after 3 seconds
     setTimeout(() => {
         phoneInput.classList.remove('input-error');
@@ -643,8 +643,62 @@ function closeHistory() {
 
 
 async function showPayments() {
-    console.log(document.getElementById("manage-payment-section"));
+    console.log(document.getElementById("payments-section"));
     hideAllSections();
-    document.getElementById('manage-payment-section').classList.remove('hidden');
+    document.getElementById('payments-section').classList.remove('hidden');
+    refreshPayments();
+
+}
+
+async function refreshPayments() {
+    try {
+        console.log("Fetching payment data...");
+        const response = await fetch(`${BASE_URL}/api/payments`);
+        console.log("Response status:", response.status); 
+        if (!response.ok) throw new Error("Failed to fetch the payments");
+        const data = await response.json();
+        console.log("Received data:", data);
+
+        renderPaymentSummary(data);
+    } catch (error) {
+        showMessage("Something went wrong", "error");
+    }
+}
+function renderPaymentSummary(data) {
+    const tbody = document.querySelector('#payments-table tbody');
+    tbody.innerHTML = '';
     
+    console.log("Rendering data:", data); // Debug log
+    
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="no-data">
+                    ${data ? "No pending payments found" : "Failed to load data"}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    data.forEach(item => {
+        console.log("Processing item:", item); // Debug each row
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.customerId ?? 'N/A'}</td>
+                <td>${item.customerName ?? 'N/A'}</td>
+                <td>${item.totalClothes ?? 0}</td>
+                <td>₹${(item.totalAmount ?? 0).toFixed(2)}</td>
+                <td>
+                    <button onclick="viewOrders(${item.customerId},'${item.customerName}')">
+                        View Orders
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function viewPaymentsOrder(customerId,customerName) {
+    viewOrders(customerId,customerName);
 }

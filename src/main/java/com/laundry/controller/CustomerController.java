@@ -52,9 +52,6 @@ public class CustomerController {
         return ResponseEntity.ok("Deleted Successfully");
     }
 
-//    @GetMapping("/search")
-//    public ResponseEntity<CustomerResponse> getByPhone(@RequestParam String phone) {
-//        return ResponseEntity.ok(customerService.findByPhoneNumber(phone));
-//    }
+
 
 }

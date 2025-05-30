@@ -386,3 +386,41 @@ input[type="radio"] {
         box-shadow: 0 0 0 0 rgba(255, 56, 96, 0);
     }
 }
+
+
+#payments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#payments-table th {
+    background: #f5f5f5;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#payments-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.view-btn {
+    background: #4e73df;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.view-btn:hover {
+    background: #2e59d9;
+}
+
+.no-data {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}

@@ -3,6 +3,7 @@ package com.laundry.service;
 
 import com.laundry.dto.OrderRequest;
 import com.laundry.dto.OrderResponse;
+import com.laundry.dto.PaymentSummary;
 import com.laundry.model.Customer;
 import com.laundry.model.Order;
 import com.laundry.repo.CustomerRepository;
@@ -150,5 +151,9 @@ public class OrderService {
                         .build());
             }
             return responses;
+    }
+
+    public List<PaymentSummary> getPaymentSummary() {
+        return orderRepo.getPaymentSummary();
     }
 }
