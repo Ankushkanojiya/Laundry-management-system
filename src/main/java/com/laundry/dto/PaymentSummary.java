@@ -7,6 +7,5 @@ import lombok.*;
 public class PaymentSummary {
     private Long customerId;
     private String customerName;
-    private Long totalClothes;
-    private Double totalAmount;
+    private Double balance;
 }

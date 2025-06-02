@@ -5,7 +5,9 @@ import com.laundry.dto.OrderRequest;
 import com.laundry.dto.OrderResponse;
 import com.laundry.dto.PaymentSummary;
 import com.laundry.model.Customer;
+import com.laundry.model.CustomerAccount;
 import com.laundry.model.Order;
+import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +21,40 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
+    private static final double REGULAR_PRICE_PER_ITEM = 10.0;
+    private static final double LAUNDRY_PRICE_PER_ITEM = 50.0;
+
     private final OrderRepository orderRepo;
     private final CustomerRepository customerRepo;
-//    private static final double PRICE_PER_CLOTH=10.00;
-//
-//    private static final double LAUNDRY_PRICE=40.00;
+    private final CustomerAccountRepository accountRepo;
+
+
+
+
 
     public OrderResponse createOrder(OrderRequest request){
         Customer customer = customerRepo.findById(request.getCustomerId())
                 .orElseThrow(()-> new RuntimeException(" no customer found"));
 
+        double totalAmount = calculateTotal(
+                request.getTotalClothes(),
+                Order.ServiceType.valueOf(request.getServiceType())
+        );
         double pricePerCloth = switch (request.getServiceType()) {
             case "LAUNDRY" -> 50.00;
             default -> 10.00; // Regular wash
         };
+
+        CustomerAccount account = accountRepo.findByCustomer(customer)
+                .orElseGet(() -> {
+                    CustomerAccount newAccount = new CustomerAccount();
+                    newAccount.setCustomer(customer);
+                    newAccount.setBalance(0.0);
+                    return accountRepo.save(newAccount);
+                });
+
+        account.setBalance(account.getBalance() + totalAmount);
+        accountRepo.save(account);
 
         Order order= Order.builder()
                 .customer(customer)
@@ -46,6 +68,13 @@ public class OrderService {
         Order savedOrder=orderRepo.save(order);
         return mapToResponse(savedOrder);
 
+    }
+
+    private double calculateTotal(int totalClothes, Order.ServiceType serviceType) {
+        double pricePerItem = serviceType == Order.ServiceType.LAUNDRY
+                ? LAUNDRY_PRICE_PER_ITEM
+                : REGULAR_PRICE_PER_ITEM;
+        return totalClothes * pricePerItem;
     }
 
     public  OrderResponse updateStatus(Long orderId, String newStatus){
@@ -151,9 +180,5 @@ public class OrderService {
                         .build());
             }
             return responses;
-    }
-
-    public List<PaymentSummary> getPaymentSummary() {
-        return orderRepo.getPaymentSummary();
     }
 }

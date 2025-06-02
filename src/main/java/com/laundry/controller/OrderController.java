@@ -23,6 +23,9 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid  @RequestBody OrderRequest request) {
+        if (request.getTotalClothes() == null || request.getTotalClothes() <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(orderService.createOrder(request));
     }

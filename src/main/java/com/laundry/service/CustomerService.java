@@ -3,6 +3,8 @@ package com.laundry.service;
 import com.laundry.dto.CustomerRequest;
 import com.laundry.dto.CustomerResponse;
 import com.laundry.model.Customer;
+import com.laundry.model.CustomerAccount;
+import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,6 +24,7 @@ public class CustomerService {
 
 
     private final CustomerRepository customerRepo;
+    private final CustomerAccountRepository accountRepo;
 
 
 

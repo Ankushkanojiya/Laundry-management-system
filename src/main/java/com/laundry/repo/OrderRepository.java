@@ -33,13 +33,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findFilteredOrder(@Param("status") Order.OrderStatus status, @Param("customerId") Long customerId, @Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
 //
 
-    @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +
-            "o.customer.id, o.customer.name, " +
-            "CAST(SUM(o.totalClothes) AS LONG), " + // Cast to Long
-            "SUM(o.totalAmount)) " +
-            "FROM Order o " +
-            "WHERE o.status IN ('PENDING', 'IN_PROGRESS') " +
-            "GROUP BY o.customer.id, o.customer.name")
-    List<PaymentSummary> getPaymentSummary();
+//    @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +
+//            "o.customer.id, o.customer.name, " +
+//            "CAST(SUM(o.totalClothes) AS LONG), " + // Cast to Long
+//            "SUM(o.totalAmount)) " +
+//            "FROM Order o " +
+//            "WHERE o.status IN ('PENDING', 'IN_PROGRESS') " +
+//            "GROUP BY o.customer.id, o.customer.name")
+//    List<PaymentSummary> getPaymentSummary();
 
 }

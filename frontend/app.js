@@ -620,7 +620,7 @@ async function updateOrderStatus(orderId, newStatus, isInModal = false) {
 
         showMessage(`Status updated to ${newStatus}`, 'success');
 
-        // Refresh the appropriate view
+
         if (isInModal && currentCustomerInModal.id) {
             // Refresh modal view
             await viewOrders(currentCustomerInModal.id, currentCustomerInModal.name);
@@ -654,7 +654,7 @@ async function refreshPayments() {
     try {
         console.log("Fetching payment data...");
         const response = await fetch(`${BASE_URL}/api/payments`);
-        console.log("Response status:", response.status); 
+        console.log("Response status:", response.status);
         if (!response.ok) throw new Error("Failed to fetch the payments");
         const data = await response.json();
         console.log("Received data:", data);
@@ -664,12 +664,14 @@ async function refreshPayments() {
         showMessage("Something went wrong", "error");
     }
 }
+
+
 function renderPaymentSummary(data) {
     const tbody = document.querySelector('#payments-table tbody');
     tbody.innerHTML = '';
-    
-    console.log("Rendering data:", data); // Debug log
-    
+
+    console.log("Rendering data:", data);
+
     if (!data || data.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -681,17 +683,24 @@ function renderPaymentSummary(data) {
         return;
     }
 
-    data.forEach(item => {
-        console.log("Processing item:", item); // Debug each row
+    data.forEach(account => {
         tbody.innerHTML += `
             <tr>
-                <td>${item.customerId ?? 'N/A'}</td>
-                <td>${item.customerName ?? 'N/A'}</td>
-                <td>${item.totalClothes ?? 0}</td>
-                <td>₹${(item.totalAmount ?? 0).toFixed(2)}</td>
+                <td>${account.customerId}</td>
+                <td>${account.customerName}</td>
+                <td>₹${account.balance.toFixed(2)}</td>
                 <td>
-                    <button onclick="viewOrders(${item.customerId},'${item.customerName}')">
+                    <button onclick="viewOrders(${account.customerId},'${account.customerName}')">
                         View Orders
+                    </button>
+                </td>
+                <td>
+                    <button onclick="showPaymentModal(
+                        ${account.customerId}, 
+                        '${account.customerName}', 
+                        ${account.balance}
+                    )">
+                        Pay
                     </button>
                 </td>
             </tr>
@@ -699,6 +708,102 @@ function renderPaymentSummary(data) {
     });
 }
 
-async function viewPaymentsOrder(customerId,customerName) {
-    viewOrders(customerId,customerName);
+
+
+
+// Track current payment context
+let currentPayment = {
+    customerId: null,
+    customerName: '',
+    balance: 0
+};
+
+// Show payment modal
+function showPaymentModal(customerId, customerName, balance) {
+    currentPayment = {
+        customerId,
+        customerName,
+        balance
+    };
+
+    // Update modal UI
+    document.getElementById('payment-customer-name').textContent = customerName;
+    document.getElementById('payment-total-due').textContent = `₹${balance.toFixed(2)}`;
+    document.getElementById('payment-amount').value = '';
+
+    // Show modal
+    const modal = document.getElementById('payment-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('modal--active');
+}
+
+// Close modal
+function closePaymentModal() {
+    const modal = document.getElementById('payment-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('modal--active');
+}
+
+// Process payment
+const paymentMessage = document.getElementById('payment-message');
+async function processPayment() {
+    const amountInput = document.getElementById('payment-amount');
+    const { customerId, balance } = currentPayment;
+    const amount = parseFloat(amountInput.value);
+
+    paymentMessage.textContent = '0';
+    paymentMessage.className = 'payment-message';
+
+    // Validation
+    if (isNaN(amount) || amount <= 0) {
+        showPaymentMessage('Please enter a valid positive amount', 'error');
+        amountInput.focus();
+        return;
+    }
+
+    if (amount > balance) {
+        showPaymentMessage(`Amount cannot exceed ₹${balance.toFixed(2)}`, 'error');
+        amountInput.focus();
+        return;
+    }
+
+    try {
+        // Call backend API
+        const response = await fetch(`${BASE_URL}/api/payments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                customerId: customerId,
+                amount: amount
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+        setTimeout(() => {
+            closePaymentModal();
+            refreshPayments();
+        }, 1500);
+        closePaymentModal();
+
+        refreshPayments();
+    } catch (error) {
+        showPaymentMessage(`Payment failed: ${error.message}`, 'error');
+    }
+}
+
+
+
+function showPaymentMessage(message, type) {
+    paymentMessage.textContent = message;
+    paymentMessage.className = `payment-message ${type}`;
+
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+        paymentMessage.textContent = '';
+        paymentMessage.className = 'payment-message';
+    }, 4000);
 }
