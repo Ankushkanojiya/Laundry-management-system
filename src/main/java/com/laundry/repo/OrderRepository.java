@@ -1,6 +1,7 @@
 package com.laundry.repo;
 
 import com.laundry.dto.PaymentSummary;
+import com.laundry.model.Customer;
 import com.laundry.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOrderByOrderDateDesc();
 
     List<Order> findByStatus(Order.OrderStatus status);
+
+    void deleteByCustomer(Customer customer);
 
     @Query("Select COUNT(o) from Order o where o.status='PENDING' ")
     long countByStatus(Order.OrderStatus status);

@@ -6,6 +6,8 @@ import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.repo.OrderRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepo;
     private final CustomerAccountRepository accountRepo;
+    private final OrderRepository orderRepo;
 
 
 
@@ -80,8 +83,16 @@ public class CustomerService {
         return mapToResponse(customerRepo.save(customer));
     }
 
+    @Transactional
     public void deleteCustomer(Long id){
+        Customer customer=customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        System.out.println("Bring it on");
+        orderRepo.deleteByCustomer(customer);
+        System.out.println("Deleted the orders");
+        accountRepo.deleteByCustomer(customer);
+        System.out.println("Delete the account");
         customerRepo.deleteById(id);
+        System.out.println("finally customer deleted");
     }
 
 }

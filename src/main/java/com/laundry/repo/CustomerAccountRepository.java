@@ -15,6 +15,8 @@ public interface CustomerAccountRepository extends JpaRepository<CustomerAccount
 
     Optional<CustomerAccount> findByCustomer(Customer customer);
 
+    void deleteByCustomer(Customer customer);
+
 
 
     @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +

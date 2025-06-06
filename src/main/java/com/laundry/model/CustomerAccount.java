@@ -17,7 +17,7 @@ public class CustomerAccount {
     private Long id;
 
 
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
