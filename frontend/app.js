@@ -790,6 +790,7 @@ async function processPayment() {
         closePaymentModal();
 
         refreshPayments();
+        loadStats();
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
     }

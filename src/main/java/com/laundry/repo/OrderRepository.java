@@ -34,6 +34,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "(:startDate IS NULL OR o.orderDate >= :startDate) AND " +
             "(:endDate IS NULL OR o.orderDate <= :endDate)")
     List<Order> findFilteredOrder(@Param("status") Order.OrderStatus status, @Param("customerId") Long customerId, @Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate);
+
+    List<Order> findByCustomerAndStatusNot(@Param("customer") Customer customer, @Param("status") Order.OrderStatus orderStatus);
 //
 
 //    @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +

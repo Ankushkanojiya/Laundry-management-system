@@ -16,6 +16,7 @@ import java.util.List;
 public class PaymentService {
     private final CustomerAccountRepository accountRepo;
     private final CustomerRepository customerRepo;
+    private final OrderService orderService;
 
     public List<PaymentSummary> getPaymentSummary(){
         return accountRepo.findCustomersWithBalance();
@@ -37,6 +38,10 @@ public class PaymentService {
         account.setBalance(account.getBalance()-request.getAmount());
         System.out.println(account.getBalance());
         accountRepo.save(account);
+
+        if (account.getBalance()==0){
+            orderService.completeAllOrders(account.getCustomer());
+        }
 
     }
 

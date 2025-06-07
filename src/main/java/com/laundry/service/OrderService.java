@@ -10,6 +10,7 @@ import com.laundry.model.Order;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.OrderRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -180,5 +181,15 @@ public class OrderService {
                         .build());
             }
             return responses;
+    }
+
+    @Transactional
+    public void completeAllOrders(Customer customer) {
+        List<Order> orders=orderRepo.findByCustomerAndStatusNot(customer, Order.OrderStatus.COMPLETED);
+
+        orders.forEach(order -> {
+            order.setStatus(Order.OrderStatus.COMPLETED);
+        });
+        orderRepo.saveAll(orders);
     }
 }
