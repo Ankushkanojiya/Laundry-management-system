@@ -261,20 +261,23 @@
     </div>
     <!-- paymetn transaction history -->
     <div id="payment-transaction-history" class="hidden">
-            <div class="modal-content">
-                <span class="close" onclick="closeTransactionModal()">&times;</span>
-                <h3>Transaction history for <span id="transaction-customer-name"></span></h3>
-                <div class="transaction-table-container">
-                    <table id="transaction-table">
+        <div class="modal-content">
+            <span class="close" onclick="closeTransactionModal()">&times;</span>
+            <h3>Transaction history for <span id="transaction-customer-name"></span></h3>
+            <div class="transaction-table-container">
+                <table id="transaction-table">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Amount</th>
                             <th>Date</th>
                         </tr>
-                    </table>
-                </div>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
+    </div>
     <script src="app.js"></script>
 </body>
 

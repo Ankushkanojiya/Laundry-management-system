@@ -812,20 +812,48 @@ function showPaymentMessage(message, type) {
 
 async function viewTransactions(customerId, customerName) {
     try {
-        console.log("Opening transaction history for ", customerName);
+        console.log("Opening transaction history for ", customerName, customerId);
 
         document.getElementById('transaction-customer-name').textContent = customerName;
         const modal = document.getElementById('payment-transaction-history');
         modal.classList.remove('hidden');
         modal.classList.add('modal--active');
-    }catch(error){
-        show
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`);
+
+        const transactionData = await response.json();
+        showTransactionHistory(transactionData);
+    } catch (error) {
+        showMessage("Something went wrong", "error");
+    }
+}
+
+async function showTransactionHistory(transactionData) {
+
+    const tbody = document.querySelector('#transaction-table tbody');
+    tbody.innerHTML = '';
+
+    if (transactionData === 0) {
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="4" class="no-data">No pending payments found</td>
+        </tr>
+        `;
+        return;
     }
 
- }
+    
+    tbody.innerHTML = transactionData.map(tData => `
+        <tr>
+            <td>${tData.transactionId}</td>
+            <td>${tData.amount.toFixed(2)}</td>
+            <td>${new Date(tData.timestamp).toLocaleString()}</td>
+        </tr>
+    `).join('');
 
- function closeTransactionModal(){
-    const modal=document.getElementById('payment-transaction-history');
+}
+
+function closeTransactionModal() {
+    const modal = document.getElementById('payment-transaction-history');
     modal.classList.add('hidden');
     modal.classList.remove('modal--active');
- }
+}
