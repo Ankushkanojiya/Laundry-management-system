@@ -4,7 +4,7 @@
 <head>
     <title>Laundry Admin</title>
     <link rel="stylesheet" href="style.css">
-    
+
 
 </head>
 
@@ -231,35 +231,51 @@
     </div>
     <!--  Payment Modal  -->
     <div id="payment-modal" class="modal hidden">
-    <div class="modal-content">
-        <span class="close" onclick="closePaymentModal()">&times;</span>
-        <h3>Record Payment</h3>
-        
-        <!-- Message container INSIDE modal-content -->
-        <div id="payment-message" class="payment-message"></div>
-        
-        <div class="form-group">
-            <label>Customer:</label>
-            <p id="payment-customer-name"></p>
-        </div>
-        
-        <div class="form-group">
-            <label>Amount Due:</label>
-            <p id="payment-total-due">₹0.00</p>
-        </div>
-        
-        <div class="form-group">
-            <label for="payment-amount">Amount Paid:</label>
-            <input type="number" id="payment-amount" min="0" step="5">
-        </div>
-        
-        <div class="modal-actions">
-            <button onclick="processPayment()">Confirm Payment</button>
-            <button onclick="closePaymentModal()">Cancel</button>
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h3>Record Payment</h3>
+
+            <!-- Message container INSIDE modal-content -->
+            <div id="payment-message" class="payment-message"></div>
+
+            <div class="form-group">
+                <label>Customer:</label>
+                <p id="payment-customer-name"></p>
+            </div>
+
+            <div class="form-group">
+                <label>Amount Due:</label>
+                <p id="payment-total-due">₹0.00</p>
+            </div>
+
+            <div class="form-group">
+                <label for="payment-amount">Amount Paid:</label>
+                <input type="number" id="payment-amount" min="0" step="5">
+            </div>
+
+            <div class="modal-actions">
+                <button onclick="processPayment()">Confirm Payment</button>
+                <button onclick="closePaymentModal()">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
-<script src="app.js"></script>
+    <!-- paymetn transaction history -->
+    <div id="payment-transaction-history" class="hidden">
+            <div class="modal-content">
+                <span class="close" onclick="closeTransactionModal()">&times;</span>
+                <h3>Transaction history for <span id="transaction-customer-name"></span></h3>
+                <div class="transaction-table-container">
+                    <table id="transaction-table">
+                        <tr>
+                            <th>ID</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <script src="app.js"></script>
 </body>
 
 </html>

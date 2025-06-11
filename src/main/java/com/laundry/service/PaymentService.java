@@ -2,13 +2,18 @@ package com.laundry.service;
 
 import com.laundry.dto.PaymentRequest;
 import com.laundry.dto.PaymentSummary;
+import com.laundry.dto.PaymentTransactionDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
+import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.repo.PaymentTransactionHistory;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,11 +22,13 @@ public class PaymentService {
     private final CustomerAccountRepository accountRepo;
     private final CustomerRepository customerRepo;
     private final OrderService orderService;
+    private final PaymentTransactionHistory transactionRepo;
 
     public List<PaymentSummary> getPaymentSummary(){
         return accountRepo.findCustomersWithBalance();
     }
 
+    @Transactional
     public void recordPayment(PaymentRequest request){
         // validate customer exists or not
         Customer customer=customerRepo.findById(request.getCustomerId()).orElseThrow(()-> new RuntimeException("Customer not found"));
@@ -39,10 +46,30 @@ public class PaymentService {
         System.out.println(account.getBalance());
         accountRepo.save(account);
 
+        // change the Status to "COMPLETE" OF EVERY ORDER
         if (account.getBalance()==0){
             orderService.completeAllOrders(account.getCustomer());
         }
+        paymentHistory(account, request);
 
+    }
+
+    @Transactional
+    public PaymentTransactionDTO paymentHistory(CustomerAccount account, PaymentRequest request){
+        PaymentTransactions transactions=new PaymentTransactions();
+        transactions.setAccount(account);
+        transactions.setAmount(request.getAmount());
+        transactions.setTimestamp(LocalDateTime.now());
+        PaymentTransactions savedTransaction = transactionRepo.save(transactions);
+        return new PaymentTransactionDTO(savedTransaction);
+
+    }
+
+    public List<PaymentTransactionDTO> getPaymentHistory(Long customerId) {
+        return transactionRepo.findByAccount_CustomerId(customerId)
+                .stream()
+                .map(PaymentTransactionDTO::new)
+                .toList();
     }
 
 }

@@ -2,10 +2,13 @@ package com.laundry.controller;
 
 import com.laundry.dto.PaymentRequest;
 import com.laundry.dto.PaymentSummary;
+import com.laundry.dto.PaymentTransactionDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
+import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.repo.PaymentTransactionHistory;
 import com.laundry.service.OrderService;
 import com.laundry.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ public class PaymentController {
     private final CustomerAccountRepository accountRepo;
     private final CustomerRepository customerRepo;
     private final PaymentService paymentService;
+    private final PaymentTransactionHistory transactionRepo;
 
 
     @GetMapping
@@ -39,5 +43,12 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
+    }
+
+
+    @GetMapping("/{customerId}/history")
+    public ResponseEntity<List<PaymentTransactionDTO>> getPaymentHistory(
+            @PathVariable Long customerId) {
+        return ResponseEntity.ok(paymentService.getPaymentHistory(customerId));
     }
 }

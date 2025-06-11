@@ -292,7 +292,7 @@ input[type="radio"] {
 }
 
 
-#customer-order-history {
+#customer-order-history, #payment-transaction-history {
     position: fixed;
     top: 0;
     left: 0;

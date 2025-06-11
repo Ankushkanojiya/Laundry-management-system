@@ -211,6 +211,7 @@ async function refreshCustomers() {
                         <button onclick="deleteCustomer(${customer.id})">Delete</button>
                         <button class="history-btn" 
                         onclick="viewOrders(${customer.id}, '${customer.name}')">📜 Orders</button>
+                        <button onClick="viewTransactions(${customer.id}, '${customer.name}')"> Transactions</button>
                     </td>
                 </tr>
             `).join('');
@@ -808,3 +809,23 @@ function showPaymentMessage(message, type) {
         paymentMessage.className = 'payment-message';
     }, 4000);
 }
+
+async function viewTransactions(customerId, customerName) {
+    try {
+        console.log("Opening transaction history for ", customerName);
+
+        document.getElementById('transaction-customer-name').textContent = customerName;
+        const modal = document.getElementById('payment-transaction-history');
+        modal.classList.remove('hidden');
+        modal.classList.add('modal--active');
+    }catch(error){
+        show
+    }
+
+ }
+
+ function closeTransactionModal(){
+    const modal=document.getElementById('payment-transaction-history');
+    modal.classList.add('hidden');
+    modal.classList.remove('modal--active');
+ }
