@@ -1,3 +1,4 @@
+
 //   Login  🔒
 
 const BASE_URL = 'http://localhost:8080';
@@ -309,12 +310,17 @@ async function submitOrder() {
 }
 //  Receipt 🧾🧾🧾
 function showOrderPopup(order) {
+    const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
     document.getElementById('popup-order-id').textContent = order.id;
     document.getElementById('popup-customer-name').textContent = order.customerName;
     document.getElementById('popup-customer-phone').textContent = order.customerPhone;
     document.getElementById('popup-cloth-count').textContent = order.totalClothes;
     document.getElementById('popup-total-amount').textContent = order.totalAmount;
-    document.getElementById('popup-order-date').textContent = new Date(order.orderDate).toLocaleDateString();
+    document.getElementById('popup-order-date').textContent = orderDate;
     document.getElementById('popup-status').textContent = order.status;
     document.getElementById('order-popup').classList.remove('hidden');
 }
@@ -829,6 +835,7 @@ async function viewTransactions(customerId, customerName) {
 
 async function showTransactionHistory(transactionData) {
 
+
     const tbody = document.querySelector('#transaction-table tbody');
     tbody.innerHTML = '';
 
@@ -841,14 +848,26 @@ async function showTransactionHistory(transactionData) {
         return;
     }
 
-    
-    tbody.innerHTML = transactionData.map(tData => `
+    tbody.innerHTML = transactionData.map(tData => {
+
+        const timeDateStamp = new Date(tData.timestamp).toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        return `
         <tr>
             <td>${tData.transactionId}</td>
             <td>${tData.amount.toFixed(2)}</td>
-            <td>${new Date(tData.timestamp).toLocaleString()}</td>
+            <td>${timeDateStamp}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
+
 
 }
 

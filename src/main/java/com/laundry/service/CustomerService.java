@@ -87,6 +87,7 @@ public class CustomerService {
     public void deleteCustomer(Long id){
         Customer customer=customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
         System.out.println("Bring it on");
+
         orderRepo.deleteByCustomer(customer);
         System.out.println("Deleted the orders");
         accountRepo.deleteByCustomer(customer);
