@@ -7,4 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class CustomerLoginResponse {
     private String message;
+    private Long customerId;
+    private String name;
+    private String phone;
 }

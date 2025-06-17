@@ -561,3 +561,17 @@ input[type="radio"] {
 .hidden {
     display: none;
 }
+
+#customer-orders-container ul,
+#customer-payments-container ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#customer-orders-container li,
+#customer-payments-container li {
+    background: #f1f1f1;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 5px;
+}

@@ -953,6 +953,14 @@ async function loginCustomer() {
 
         const result = await response.json();
         showCustomerAuthMessage("Login successful!", "success");
+        localStorage.setItem("customerId", result.customerId);
+        localStorage.setItem("customerName", result.name);
+        localStorage.setItem("customerPhone", result.phone);
+
+        document.getElementById("auth-section").classList.add("hidden");
+        document.getElementById("customer-dashboard").classList.remove("hidden");
+
+        loadCustomerDashboard(result.customerId);
 
         
     } catch (err) {
@@ -960,7 +968,77 @@ async function loginCustomer() {
     }
     
 }
+
+function loadCustomerDashboard(customerId) {
+    const name = localStorage.getItem("customerName");
+    document.getElementById("customer-name-display").textContent = name;
+
+    fetchCustomerOrders(customerId);
+    fetchCustomerPayments(customerId);
+}
       
+async function fetchCustomerOrders(customerId) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch orders");
+        }
+
+        const orders = await response.json();
+        console.log("Rendering order"+orders)
+        const container = document.getElementById("customer-orders-container");
+
+        if (orders.length === 0) {
+            container.innerHTML = "<p>No orders found.</p>";
+            return;
+        }
+
+        let html = "<ul>";
+        for (const order of orders) {
+            html += `<li>
+                📅 ${order.orderDate} | 🧺 ${order.totalClothes} clothes | ₹${order.totalAmount} | ${order.serviceType} | 🟢 ${order.status}
+            </li>`;
+        }
+        html += "</ul>";
+        container.innerHTML = html;
+
+    } catch (err) {
+        document.getElementById("customer-orders-container").innerHTML = `<p class="error">${err.message}</p>`;
+    }
+}
+
+async function fetchCustomerPayments(customerId) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch payment history");
+        }
+
+        const payments = await response.json();
+        const container = document.getElementById("customer-payments-container");
+
+        if (payments.length === 0) {
+            container.innerHTML = "<p>No payment history.</p>";
+            return;
+        }
+
+        let html = "<ul>";
+        for (const txn of payments) {
+            const date = new Date(txn.timestamp).toLocaleString('en-IN', {
+                dateStyle: "medium", timeStyle: "short"
+            });
+            html += `<li>
+                💸 ₹${txn.amount} | ${date}
+            </li>`;
+        }
+        html += "</ul>";
+        container.innerHTML = html;
+
+    } catch (err) {
+        document.getElementById("customer-payments-container").innerHTML = `<p class="error">${err.message}</p>`;
+    }
+}
+
 
 function showCustomerAuthMessage(msg, type) {
     const el = document.getElementById("customer-auth-message");

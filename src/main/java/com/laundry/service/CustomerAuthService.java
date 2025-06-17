@@ -52,6 +52,7 @@ public class CustomerAuthService {
             throw new RuntimeException("Invalid phone or password");
         }
 
-        return new CustomerLoginResponse("Login Successful");
+        Customer customer=login.getCustomer();
+        return new CustomerLoginResponse("Login Successful", customer.getId(), customer.getName(), customer.getPhoneNumber());
     }
 }
