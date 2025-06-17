@@ -29,8 +29,5 @@ public class OrderRequest {
 
     @NotNull
     private String serviceType;
-////
-//    @NotBlank(message = "Status is required")
-//    private String status; // "PENDING", "IN_PROGRESS", "COMPLETED"
 
 }

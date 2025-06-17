@@ -11,13 +11,9 @@ import java.util.Optional;
 
 public interface CustomerAccountRepository extends JpaRepository<CustomerAccount, Long> {
 
-
-
     Optional<CustomerAccount> findByCustomer(Customer customer);
 
     void deleteByCustomer(Customer customer);
-
-
 
     @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +
             "c.id, c.name, " +
@@ -26,7 +22,4 @@ public interface CustomerAccountRepository extends JpaRepository<CustomerAccount
             "JOIN a.customer c " +
             "WHERE a.balance > 0")  // Only show customers with balance due
     List<PaymentSummary> findCustomersWithBalance();
-
-
-
 }

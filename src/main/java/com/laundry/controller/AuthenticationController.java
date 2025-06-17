@@ -23,11 +23,4 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body("error: Invalid credentials");
         }
     }
-
-    // AuthenticationController.java - Add logout placeholder
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout() {
-//        return ResponseEntity.ok("Logged out successfully");
-//    }
-
 }
