@@ -973,75 +973,101 @@ function loadCustomerDashboard(customerId) {
     const name = localStorage.getItem("customerName");
     document.getElementById("customer-name-display").textContent = name;
 
+    fetchCustomerBalance(customerId);
     fetchCustomerOrders(customerId);
     fetchCustomerPayments(customerId);
 }
+
+async function fetchCustomerBalance(customerId) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`);
+        if (!response.ok) throw new Error("Failed to fetch balance");
+
+        const balance = await response.json();
+        const display = document.getElementById("customer-balance");
+        display.textContent = balance.toFixed(2);
+
+    } catch (err) {
+        console.error("Error fetching balance:", err.message);
+        document.getElementById("customer-balance").textContent = "Error";
+    }
+}
+
       
 async function fetchCustomerOrders(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
-        if (!response.ok) {
-            throw new Error("Failed to fetch orders");
-        }
+        if (!response.ok) throw new Error("Failed to fetch orders");
 
         const orders = await response.json();
-        console.log("Rendering order"+orders)
-        const container = document.getElementById("customer-orders-container");
+        const tbody = document.getElementById("customer-order-body");
+        tbody.innerHTML = "";
 
         if (orders.length === 0) {
-            container.innerHTML = "<p>No orders found.</p>";
+            tbody.innerHTML = `<tr><td colspan="5">No orders found</td></tr>`;
             return;
         }
 
-        let html = "<ul>";
         for (const order of orders) {
-            html += `<li>
-                📅 ${order.orderDate} | 🧺 ${order.totalClothes} clothes | ₹${order.totalAmount} | ${order.serviceType} | 🟢 ${order.status}
-            </li>`;
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${order.orderDate}</td>
+                <td>${order.serviceType}</td>
+                <td>${order.totalClothes}</td>
+                <td>₹${order.totalAmount}</td>
+                <td>${order.status}</td>
+            `;
+            tbody.appendChild(row);
         }
-        html += "</ul>";
-        container.innerHTML = html;
-
     } catch (err) {
-        document.getElementById("customer-orders-container").innerHTML = `<p class="error">${err.message}</p>`;
+        document.getElementById("customer-order-body").innerHTML = `<tr><td colspan="5">${err.message}</td></tr>`;
     }
 }
 
 async function fetchCustomerPayments(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`);
-        if (!response.ok) {
-            throw new Error("Failed to fetch payment history");
-        }
+        if (!response.ok) throw new Error("Failed to fetch payments");
 
         const payments = await response.json();
-        const container = document.getElementById("customer-payments-container");
+        const tbody = document.getElementById("customer-payment-body");
+        tbody.innerHTML = "";
 
         if (payments.length === 0) {
-            container.innerHTML = "<p>No payment history.</p>";
+            tbody.innerHTML = `<tr><td colspan="3">No payments found</td></tr>`;
             return;
         }
 
-        let html = "<ul>";
         for (const txn of payments) {
-            const date = new Date(txn.timestamp).toLocaleString('en-IN', {
-                dateStyle: "medium", timeStyle: "short"
-            });
-            html += `<li>
-                💸 ₹${txn.amount} | ${date}
-            </li>`;
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${txn.transactionId}</td>
+                <td>₹${txn.amount}</td>
+                <td>${new Date(txn.timestamp).toLocaleString('en-IN')}</td>
+            `;
+            tbody.appendChild(row);
         }
-        html += "</ul>";
-        container.innerHTML = html;
-
     } catch (err) {
-        document.getElementById("customer-payments-container").innerHTML = `<p class="error">${err.message}</p>`;
+        document.getElementById("customer-payment-body").innerHTML = `<tr><td colspan="3">${err.message}</td></tr>`;
     }
 }
+
 
 
 function showCustomerAuthMessage(msg, type) {
     const el = document.getElementById("customer-auth-message");
     el.textContent = msg;
     el.className = type;
+}
+
+function logoutCustomer() {
+    localStorage.removeItem("customerId");
+    localStorage.removeItem("customerName");
+    localStorage.removeItem("customerPhone");
+
+    // Hide dashboard, show login form
+    document.getElementById("customer-dashboard").classList.add("hidden");
+    document.getElementById("auth-section").classList.remove("hidden");
+
+    showTab("customer"); 
 }

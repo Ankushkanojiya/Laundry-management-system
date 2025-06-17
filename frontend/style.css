@@ -321,7 +321,7 @@ input[type="radio"] {
     color: #000b03;
 }
 
-#customer-order-history-name, #transaction-customer-name {
+#customer-order-history-name, #transaction-customer-name , #customer-name-display{
     color: #2E7D32;
     font-size: 1.75rem;
     font-weight: 600;
@@ -575,3 +575,14 @@ input[type="radio"] {
     margin-bottom: 6px;
     border-radius: 5px;
 }
+
+.logout-btn {
+    background: #e53935;
+    color: white;
+    padding: 8px 16px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+

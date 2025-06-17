@@ -47,11 +47,48 @@
     <div id="customer-dashboard" class="hidden">
         <h2>Welcome, <span id="customer-name-display"></span></h2>
 
-        <h3>Your Orders</h3>
-        <div id="customer-orders-container"></div>
+        <h3>💰 Balance Due: ₹<span id="customer-balance">0</span></h3>
+        <div id="payment-section">
+            <button onclick="openPaymentModal()" id="pay-now-btn">💳 Pay Now</button>
+        </div>
 
-        <h3>Your Payments</h3>
-        <div id="customer-payments-container"></div>
+        <button onclick="logoutCustomer()" class="logout-btn">Logout</button>
+
+
+        <div class="table-container">
+            <h3>Your Orders</h3>
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>Order Date</th>
+                        <th>Service</th>
+                        <th>Total Clothes</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-order-body">
+
+                </tbody>
+            </table>
+        </div>
+        <div id="customer-orders-container"></div>
+        <div class="table-container">
+            <h3>Your Payments</h3>
+            <table class="payment-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Amount</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="customer-payment-body">
+
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 

@@ -51,4 +51,15 @@ public class PaymentController {
             @PathVariable Long customerId) {
         return ResponseEntity.ok(paymentService.getPaymentHistory(customerId));
     }
+
+    @GetMapping("/{customerId}/balance")
+    public ResponseEntity<Double> getCustomerBalance(@PathVariable Long customerId){
+        Customer customer=customerRepo.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        CustomerAccount account=accountRepo.findByCustomer(customer)
+                .orElseThrow(()-> new RuntimeException("Account not found"));
+
+        return ResponseEntity.ok(account.getBalance());
+    }
 }
