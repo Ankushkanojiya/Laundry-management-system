@@ -23,6 +23,26 @@ async function loadStats() {
     }
 }
 
+function showTab(type) {
+    const adminTab = document.getElementById('tab-admin');
+    const customerTab = document.getElementById('tab-customer');
+    const adminForm = document.getElementById('admin-form');
+    const customerForm = document.getElementById('customer-form');
+
+    if (type === 'admin') {
+        adminForm.classList.remove('hidden');
+        customerForm.classList.add('hidden');
+        adminTab.classList.add('active-tab');
+        customerTab.classList.remove('active-tab');
+    } else {
+        customerForm.classList.remove('hidden');
+        adminForm.classList.add('hidden');
+        customerTab.classList.add('active-tab');
+        adminTab.classList.remove('active-tab');
+    }
+}
+
+
 // Login function
 async function login() {
     console.log("Login initiated....");
@@ -46,7 +66,9 @@ async function login() {
         }
 
         // Only execute if login is successful
-        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('admin-form').classList.add('hidden');
+
         document.getElementById('admin-dashboard').classList.remove('hidden');
         hideAllSections(); // Hide all sections initially
         await refreshCustomers(); // Load initial customer data
@@ -875,4 +897,73 @@ function closeTransactionModal() {
     const modal = document.getElementById('payment-transaction-history');
     modal.classList.add('hidden');
     modal.classList.remove('modal--active');
+}
+
+
+
+async function registerCustomer() {
+
+    const phone=document.getElementById('customer-phone-register').value.trim();
+    const password=document.getElementById('customer-password-register').value.trim();
+
+    if(!phone||!password){
+        showCustomerAuthMessage("please fill both fields","error");
+        return;
+    }
+
+    try {
+        const response= await fetch(`${BASE_URL}/api/customer-auth/register`,{
+            method:'POST',
+            headers:{'Content-type':'application/json'},
+            body:JSON.stringify({phoneNumber:phone,password:password})
+        });
+
+        if(!response.ok){
+            throw new Error("Contact your admin to registration");
+        }
+
+        const message = await response.text();
+        showCustomerAuthMessage(message, "success");
+        
+    } catch (error) {
+        showCustomerAuthMessage(error.message,"failed registration");
+    }
+
+}
+
+async function loginCustomer() {
+    const phone = document.getElementById('customer-phone-login').value.trim();
+    const password = document.getElementById('customer-password-login').value.trim();
+
+    if (!phone || !password) {
+        showCustomerAuthMessage("Please enter phone and password", "error");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/customer-auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber: phone, password: password })
+        });
+
+        if (!response.ok) {
+            throw new Error("Login failed");
+        }
+
+        const result = await response.json();
+        showCustomerAuthMessage("Login successful!", "success");
+
+        
+    } catch (err) {
+        showCustomerAuthMessage(err.message, "error");
+    }
+    
+}
+      
+
+function showCustomerAuthMessage(msg, type) {
+    const el = document.getElementById("customer-auth-message");
+    el.textContent = msg;
+    el.className = type;
 }

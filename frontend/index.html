@@ -11,14 +11,39 @@
 <body>
     <h1>Laundry Management System</h1>
 
-    <!-- Login Section -->
-    <div id="login-section" class="form-section">
-        <h2>Admin Login</h2>
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button onclick="login()">Login</button>
-        <p id="login-message"></p>
+    <div id="auth-section" class="auth-container">
+        <!-- Toggle Tabs -->
+        <div class="tab-toggle">
+            <button onclick="showTab('admin')" id="tab-admin" class="active-tab">Admin</button>
+            <button onclick="showTab('customer')" id="tab-customer">Customer</button>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div id="admin-form" class="auth-form">
+            <h2>Admin Login</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <p id="login-message"></p>
+        </div>
+
+        <!-- Customer registration and login form -->
+        <div id="customer-form" class="auth-form hidden">
+            <h2>Customer Login</h2>
+            <input type="text" id="customer-phone-login" placeholder="Phone Number">
+            <input type="password" id="customer-password-login" placeholder="Password">
+            <button onclick="loginCustomer()">Login</button>
+
+            <hr>
+
+            <h3>New Customer? Register here</h3>
+            <input type="text" id="customer-phone-register" placeholder="Phone Number">
+            <input type="password" id="customer-password-register" placeholder="Password">
+            <button onclick="registerCustomer()">Register</button>
+            <p id="customer-auth-message"></p>
+        </div>
     </div>
+
 
     <!-- Admin Dashboard -->
     <div id="admin-dashboard" class="hidden">
@@ -278,7 +303,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="app.js"></script>
 </body>
 
