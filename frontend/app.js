@@ -749,6 +749,13 @@ let currentPayment = {
 
 // Show payment modal
 function showPaymentModal(customerId, customerName, balance) {
+    // for customer side — use localStorage
+    if (!customerId) {
+
+        customerId = localStorage.getItem("customerId");
+        customerName = localStorage.getItem("customerName");
+        balance = parseFloat(document.getElementById("customer-balance").textContent);
+    }
     currentPayment = {
         customerId,
         customerName,
@@ -820,6 +827,10 @@ async function processPayment() {
 
         refreshPayments();
         loadStats();
+        fetchCustomerBalance(customerId);
+        fetchCustomerOrders(customerId);
+        fetchCustomerPayments(customerId);
+
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
     }
@@ -903,30 +914,30 @@ function closeTransactionModal() {
 
 async function registerCustomer() {
 
-    const phone=document.getElementById('customer-phone-register').value.trim();
-    const password=document.getElementById('customer-password-register').value.trim();
+    const phone = document.getElementById('customer-phone-register').value.trim();
+    const password = document.getElementById('customer-password-register').value.trim();
 
-    if(!phone||!password){
-        showCustomerAuthMessage("please fill both fields","error");
+    if (!phone || !password) {
+        showCustomerAuthMessage("please fill both fields", "error");
         return;
     }
 
     try {
-        const response= await fetch(`${BASE_URL}/api/customer-auth/register`,{
-            method:'POST',
-            headers:{'Content-type':'application/json'},
-            body:JSON.stringify({phoneNumber:phone,password:password})
+        const response = await fetch(`${BASE_URL}/api/customer-auth/register`, {
+            method: 'POST',
+            headers: { 'Content-type': 'application/json' },
+            body: JSON.stringify({ phoneNumber: phone, password: password })
         });
 
-        if(!response.ok){
+        if (!response.ok) {
             throw new Error("Contact your admin to registration");
         }
 
         const message = await response.text();
         showCustomerAuthMessage(message, "success");
-        
+
     } catch (error) {
-        showCustomerAuthMessage(error.message,"failed registration");
+        showCustomerAuthMessage(error.message, "failed registration");
     }
 
 }
@@ -960,13 +971,14 @@ async function loginCustomer() {
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("customer-dashboard").classList.remove("hidden");
 
-        loadCustomerDashboard(result.customerId);
+        loadCustomerDashboard(result.customerId)
 
-        
+
+
     } catch (err) {
         showCustomerAuthMessage(err.message, "error");
     }
-    
+
 }
 
 function loadCustomerDashboard(customerId) {
@@ -993,7 +1005,7 @@ async function fetchCustomerBalance(customerId) {
     }
 }
 
-      
+
 async function fetchCustomerOrders(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
@@ -1069,5 +1081,9 @@ function logoutCustomer() {
     document.getElementById("customer-dashboard").classList.add("hidden");
     document.getElementById("auth-section").classList.remove("hidden");
 
-    showTab("customer"); 
+    showTab("customer");
+}
+
+function openPaymentModal() {
+    showPaymentModal();
 }

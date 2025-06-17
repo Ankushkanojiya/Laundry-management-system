@@ -45,14 +45,15 @@
     </div>
 
     <div id="customer-dashboard" class="hidden">
-        <h2>Welcome, <span id="customer-name-display"></span></h2>
-
-        <h3>💰 Balance Due: ₹<span id="customer-balance">0</span></h3>
-        <div id="payment-section">
-            <button onclick="openPaymentModal()" id="pay-now-btn">💳 Pay Now</button>
+        <div class="dashboard-header">
+            <div><h2>👋 Welcome <span id="customer-name-display"></span>,</h2></div>
+            <button onclick="logoutCustomer()" class="logout-btn">Logout</button>
         </div>
 
-        <button onclick="logoutCustomer()" class="logout-btn">Logout</button>
+        <div class="balance-box">
+            <h2>💰 Balance Due: ₹<span id="customer-balance">0</span></h2>
+            <button onclick="openPaymentModal()" id="pay-now-btn">Pay 💳</button>
+        </div>
 
 
         <div class="table-container">
