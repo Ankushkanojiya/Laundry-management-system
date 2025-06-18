@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', populateCustomerFilter());
 
 
 async function loadStats() {
-
+    console.log("📊 loadStats() called...");
     try {
         const response = await fetch(`${BASE_URL}/api/stats`, {
             method: "GET",
@@ -91,8 +91,13 @@ async function login() {
         document.getElementById('admin-form').classList.add('hidden');
 
         document.getElementById('admin-dashboard').classList.remove('hidden');
+        // document.getElementById("stats-cards").classList.remove('hidden');
+        document.getElementById("stats-cards").style.display = "grid";
+       
+        loadStats();
+
         hideAllSections(); // Hide all sections initially
-        await refreshCustomers(); // Load initial customer data
+        await refreshCustomers();
     } catch (error) {
         showMessage(error.message, 'error', 'login-message');
         console.error('Login error:', error);
@@ -206,7 +211,7 @@ async function updateCustomer() {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, phoneNumber: phone }),
-            credentials:"include"
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -233,7 +238,8 @@ async function deleteCustomer(id) {
 
     try {
         const response = await fetch(`${BASE_URL}/api/customers/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -475,7 +481,10 @@ async function refreshOrders() {
 
 
 
-        const response = await fetch(`${BASE_URL}/api/orders/filter?${new URLSearchParams(cleanFilters)}`);
+        const response = await fetch(`${BASE_URL}/api/orders/filter?${new URLSearchParams(cleanFilters)}`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error('Failed to load orders');
 
         const orders = await response.json();
@@ -554,7 +563,10 @@ async function updateStatus(orderId, newStatus) {
     try {
         const response = await fetch(
             `${BASE_URL}/api/orders/${orderId}/status?newStatus=${newStatus}`,
-            { method: 'PATCH' }
+            {
+                method: 'PATCH',
+                credentials: "include"
+            }
         );
 
         if (!response.ok) {
@@ -572,7 +584,10 @@ async function updateStatus(orderId, newStatus) {
 
 async function populateCustomerFilter() {
     try {
-        const response = await fetch(`${BASE_URL}/api/customers`);
+        const response = await fetch(`${BASE_URL}/api/customers`, {
+            method: "GET",
+            credentials: "include"
+        });
 
         if (!response.ok) throw new Error("Customer not found");
         const customers = await response.json();
@@ -606,7 +621,10 @@ async function viewOrders(customerId, customerName) {
         modal.classList.remove('hidden');
         modal.classList.add('modal--active');
 
-        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
+        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error("Failed to fetch");
 
         const orders = await response.json();
@@ -685,7 +703,10 @@ async function updateOrderStatus(orderId, newStatus, isInModal = false) {
     try {
         const response = await fetch(
             `${BASE_URL}/api/orders/${orderId}/status?newStatus=${newStatus}`,
-            { method: 'PATCH' }
+            {
+                method: 'PATCH',
+                credentials: "include"
+            }
         );
 
         if (!response.ok) {
@@ -728,7 +749,10 @@ async function showPayments() {
 async function refreshPayments() {
     try {
         console.log("Fetching payment data...");
-        const response = await fetch(`${BASE_URL}/api/payments`);
+        const response = await fetch(`${BASE_URL}/api/payments`, {
+            method: "GET",
+            credentials: "include"
+        });
         console.log("Response status:", response.status);
         if (!response.ok) throw new Error("Failed to fetch the payments");
         const data = await response.json();
@@ -857,7 +881,8 @@ async function processPayment() {
             body: JSON.stringify({
                 customerId: customerId,
                 amount: amount
-            })
+            }),
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -903,7 +928,10 @@ async function viewTransactions(customerId, customerName) {
         const modal = document.getElementById('payment-transaction-history');
         modal.classList.remove('hidden');
         modal.classList.add('modal--active');
-        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`);
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`, {
+            method: "GET",
+            credentials: "include"
+        });
 
         const transactionData = await response.json();
         showTransactionHistory(transactionData);
@@ -965,7 +993,8 @@ async function registerCustomer() {
         const response = await fetch(`${BASE_URL}/api/customer-auth/register`, {
             method: 'POST',
             headers: { 'Content-type': 'application/json' },
-            body: JSON.stringify({ phoneNumber: phone, password: password })
+            body: JSON.stringify({ phoneNumber: phone, password: password }),
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -994,7 +1023,8 @@ async function loginCustomer() {
         const response = await fetch(`${BASE_URL}/api/customer-auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phoneNumber: phone, password: password })
+            body: JSON.stringify({ phoneNumber: phone, password: password }),
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -1031,7 +1061,10 @@ function loadCustomerDashboard(customerId) {
 
 async function fetchCustomerBalance(customerId) {
     try {
-        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`);
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error("Failed to fetch balance");
 
         const balance = await response.json();
@@ -1047,7 +1080,10 @@ async function fetchCustomerBalance(customerId) {
 
 async function fetchCustomerOrders(customerId) {
     try {
-        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`);
+        const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error("Failed to fetch orders");
 
         const orders = await response.json();
@@ -1083,7 +1119,10 @@ async function fetchCustomerOrders(customerId) {
 
 async function fetchCustomerPayments(customerId) {
     try {
-        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`);
+        const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error("Failed to fetch payments");
 
         const payments = await response.json();
