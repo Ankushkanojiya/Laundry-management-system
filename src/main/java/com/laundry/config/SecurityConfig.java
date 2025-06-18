@@ -40,9 +40,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**",
+                        .requestMatchers(
                                 "/api/customer-auth/**",
-                                "/api/login/**").permitAll()
+                                "/api/orders/customer/**",
+                                "/api/payments/**",
+                                "/h2-console/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

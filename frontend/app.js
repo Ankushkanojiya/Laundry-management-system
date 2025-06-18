@@ -4,8 +4,10 @@
 const BASE_URL = 'http://localhost:8080';
 
 
-document.addEventListener('DOMContentLoaded', loadStats());
-document.addEventListener('DOMContentLoaded', populateCustomerFilter());
+// document.addEventListener('DOMContentLoaded', () => {
+//     console.log("DOM loaded. Waiting for login...");
+    
+// });
 
 
 async function loadStats() {
@@ -95,6 +97,8 @@ async function login() {
         document.getElementById("stats-cards").style.display = "grid";
        
         loadStats();
+        populateCustomerFilter();
+        
 
         hideAllSections(); // Hide all sections initially
         await refreshCustomers();
@@ -1035,7 +1039,7 @@ async function loginCustomer() {
         showCustomerAuthMessage("Login successful!", "success");
         localStorage.setItem("customerId", result.customerId);
         localStorage.setItem("customerName", result.name);
-        localStorage.setItem("customerPhone", result.phone);
+        
 
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("customer-dashboard").classList.remove("hidden");
@@ -1062,8 +1066,7 @@ function loadCustomerDashboard(customerId) {
 async function fetchCustomerBalance(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`, {
-            method: "GET",
-            credentials: "include"
+            method: "GET"
         });
         if (!response.ok) throw new Error("Failed to fetch balance");
 
@@ -1081,8 +1084,8 @@ async function fetchCustomerBalance(customerId) {
 async function fetchCustomerOrders(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`, {
-            method: "GET",
-            credentials: "include"
+            method: "GET"
+            
         });
         if (!response.ok) throw new Error("Failed to fetch orders");
 
@@ -1120,8 +1123,8 @@ async function fetchCustomerOrders(customerId) {
 async function fetchCustomerPayments(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`, {
-            method: "GET",
-            credentials: "include"
+            method: "GET"
+            
         });
         if (!response.ok) throw new Error("Failed to fetch payments");
 

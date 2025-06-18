@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 @Service
 public class CustomerAuthService {
@@ -44,15 +46,18 @@ public class CustomerAuthService {
         return "registration Successful";
     }
 
-    public CustomerLoginResponse login(CustomerLoginRequest request){
-        CustomerLogin login=loginRepo.findByPhoneNumber(request.getPhoneNumber())
-                .orElseThrow(() -> new RuntimeException("Invalid phone number or password"));
+    public CustomerLoginResponse login(String phoneNumber, String password){
+        Customer customer=customerRepo.findByPhoneNumber(phoneNumber).orElseThrow(()-> new RuntimeException("Invalid phone number"));
 
-        if (!passwordEncoder.matches(request.getPassword(),login.getPassword())){
-            throw new RuntimeException("Invalid phone or password");
+        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new RuntimeException("No account found"));
+
+        if (!passwordEncoder.matches(password, login.getPassword())){
+            throw new RuntimeException("Invalid phone number and password");
         }
 
-        Customer customer=login.getCustomer();
-        return new CustomerLoginResponse("Login Successful", customer.getId(), customer.getName(), customer.getPhoneNumber());
+        return new CustomerLoginResponse(customer.getId(), customer.getName());
+
+
     }
+
 }

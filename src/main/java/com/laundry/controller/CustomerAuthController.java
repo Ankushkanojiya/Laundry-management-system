@@ -5,11 +5,14 @@ import com.laundry.dto.CustomerLoginResponse;
 import com.laundry.dto.CustomerRegisterRequest;
 import com.laundry.service.CustomerAuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RequestMapping("/api/customer-auth")
 @RequiredArgsConstructor
@@ -25,8 +28,16 @@ public class CustomerAuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CustomerLoginResponse> login(@RequestBody CustomerLoginRequest request){
-        CustomerLoginResponse response=authService.login(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> login(@RequestBody CustomerLoginRequest request) {
+        try {
+            CustomerLoginResponse response = authService.login(
+                    request.getPhoneNumber(), request.getPassword()
+            );
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
+
 }
