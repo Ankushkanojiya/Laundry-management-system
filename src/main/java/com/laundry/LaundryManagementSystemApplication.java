@@ -24,24 +24,26 @@ public class LaundryManagementSystemApplication {
 
 	}
 	@Bean
-	CommandLineRunner initAdmin(AdminRepository adminRepo) {
+	CommandLineRunner initAdmin(AdminRepository adminRepo, BCryptPasswordEncoder encoder) {
 		return args -> {
 			Admin admin = new Admin();
 			admin.setUsername("admin");
-			admin.setPassword("admin123");
+			admin.setPassword(encoder.encode("admin123"));
 			adminRepo.save(admin);
 		};
 	}
 
-	@Bean
-	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**")
-						.allowedOrigins("*") // VS Code port
-						.allowedMethods("*");
-			}
-		};
-	}
+//	@Bean
+//	public WebMvcConfigurer corsConfigurer() {
+//		return new WebMvcConfigurer() {
+//			@Override
+//			public void addCorsMappings(CorsRegistry registry) {
+//				registry.addMapping("/**")
+//						.allowedOrigins("http://localhost:5500") // VS Code port
+//						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+//						.allowedHeaders("*")
+//						.allowCredentials(true);
+//			}
+//		};
+//	}
 }

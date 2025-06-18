@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', populateCustomerFilter());
 async function loadStats() {
 
     try {
-        const response = await fetch(`${BASE_URL}/api/stats`);
+        const response = await fetch(`${BASE_URL}/api/stats`, {
+            method: "GET",
+            credentials: "include"
+        });
         const data = await response.json();
 
         document.getElementById('pending-count').textContent = data.pendingOrders;
@@ -62,16 +65,22 @@ async function login() {
     const password = document.getElementById('password').value.trim();
 
     if (!username || !password) {
-        showMessage('Please enter credentials', 'error', 'login-message');
+        document.getElementById("login-message").textContent = "Username and password required";
         return;
     }
 
+    const formData = new URLSearchParams();
+    formData.append("username", username);
+    formData.append("password", password);
+
     try {
-        const response = await fetch(`${BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const response = await fetch(`${BASE_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData,
+            credentials: "include"
+        })
+
 
         if (!response.ok) {
             throw new Error('Login failed - Incorrect username or password ' + response.status);
@@ -89,6 +98,18 @@ async function login() {
         console.error('Login error:', error);
     }
 }
+
+async function logoutAdmin() {
+    await fetch(`${BASE_URL}/logout`, {
+        method: "POST",
+        credentials: "include"
+    });
+
+
+    document.getElementById("admin-dashboard").classList.add("hidden");
+    document.getElementById("auth-section").classList.remove("hidden");
+}
+
 
 //  <!--    Add new customer  🧑➕➕➕-->
 async function addCustomer() {
@@ -110,7 +131,8 @@ async function addCustomer() {
         const response = await fetch(`${BASE_URL}/api/customers`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, phoneNumber: phone })
+            body: JSON.stringify({ name, phoneNumber: phone }),
+            credentials: "include"
         });
 
         const responseData = await response.text()
@@ -154,7 +176,10 @@ let currentCustomerId = null;
 async function editCustomer(id) {
     try {
         showMessage('', 'clear', 'edit-customer-message');
-        const response = await fetch(`${BASE_URL}/api/customers/${id}`);
+        const response = await fetch(`${BASE_URL}/api/customers/${id}`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error('Failed to fetch customer');
 
         const customer = await response.json();
@@ -180,7 +205,8 @@ async function updateCustomer() {
         const response = await fetch(`${BASE_URL}/api/customers/${currentCustomerId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, phoneNumber: phone })
+            body: JSON.stringify({ name, phoneNumber: phone }),
+            credentials:"include"
         });
 
         if (!response.ok) {
@@ -226,7 +252,11 @@ async function deleteCustomer(id) {
 
 async function refreshCustomers() {
     try {
-        const response = await fetch(`${BASE_URL}/api/customers`);
+
+        const response = await fetch(`${BASE_URL}/api/customers`, {
+            method: "GET",
+            credentials: "include"
+        });
         if (!response.ok) throw new Error('Failed to load customers');
 
 
@@ -292,7 +322,10 @@ function showTakeOrder() {
 //  populate the customer in Take order
 async function loadCustomersForOrder() {
     try {
-        const response = await fetch(`${BASE_URL}/api/customers`);
+        const response = await fetch(`${BASE_URL}/api/customers`, {
+            method: "GET",
+            credentials: "include"
+        });
         const customers = await response.json();
         const select = document.getElementById('customer-select', '');
 
@@ -326,7 +359,8 @@ async function submitOrder() {
                 customerId: parseInt(customerSelect.value),
                 totalClothes: parseInt(clothCountInput.value),
                 serviceType: serviceType
-            })
+            }),
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -1024,14 +1058,14 @@ async function fetchCustomerOrders(customerId) {
             tbody.innerHTML = `<tr><td colspan="5">No orders found</td></tr>`;
             return;
         }
-        
-        
+
+
         for (const order of orders) {
             const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${orderDate}</td>
