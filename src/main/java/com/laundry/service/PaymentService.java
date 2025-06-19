@@ -9,8 +9,10 @@ import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.PaymentTransactionHistory;
+import com.laundry.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ public class PaymentService {
     private final CustomerRepository customerRepo;
     private final OrderService orderService;
     private final PaymentTransactionHistory transactionRepo;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public List<PaymentSummary> getPaymentSummary(){
         return accountRepo.findCustomersWithBalance();
@@ -72,4 +76,22 @@ public class PaymentService {
                 .toList();
     }
 
+    @Transactional
+    public String recordCustomerPayment(PaymentRequest request, String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")){
+            return "The invalid token";
+        }
+        String token=authHeader.substring(7);
+        String phone=jwtUtil.extractPhone(token);
+
+        Customer customer = customerRepo.findByPhoneNumber(phone)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        PaymentRequest paymentRequest=new PaymentRequest();
+        paymentRequest.setCustomerId(customer.getId());
+        paymentRequest.setAmount(request.getAmount());
+
+        recordPayment(paymentRequest);
+        return "Payment Successful";
+    }
 }

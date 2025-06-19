@@ -1,10 +1,7 @@
 package com.laundry.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,6 +22,7 @@ public class Customer {
     private  String phoneNumber;
     private LocalDate registrationDate = LocalDate.now();
     // Add this for bidirectional relationship
+    @ToString.Exclude
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 

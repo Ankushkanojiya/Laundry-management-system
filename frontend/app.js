@@ -6,7 +6,7 @@ const BASE_URL = 'http://localhost:8080';
 
 // document.addEventListener('DOMContentLoaded', () => {
 //     console.log("DOM loaded. Waiting for login...");
-    
+
 // });
 
 
@@ -59,7 +59,7 @@ function formatDateTime(timestamp) {
     });
 }
 
-
+let paymentMode="";
 // Login function
 async function login() {
     console.log("Login initiated....");
@@ -93,12 +93,12 @@ async function login() {
         document.getElementById('admin-form').classList.add('hidden');
 
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        // document.getElementById("stats-cards").classList.remove('hidden');
+
         document.getElementById("stats-cards").style.display = "grid";
-       
+
         loadStats();
         populateCustomerFilter();
-        
+
 
         hideAllSections(); // Hide all sections initially
         await refreshCustomers();
@@ -982,6 +982,14 @@ function closeTransactionModal() {
 }
 
 
+function getAuthHeaders() {
+    const token = localStorage.getItem("customerToken");
+    return {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
+}
+
 
 async function registerCustomer() {
 
@@ -1028,7 +1036,7 @@ async function loginCustomer() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phoneNumber: phone, password: password }),
-            credentials: "include"
+
         });
 
         if (!response.ok) {
@@ -1037,9 +1045,10 @@ async function loginCustomer() {
 
         const result = await response.json();
         showCustomerAuthMessage("Login successful!", "success");
+        localStorage.setItem("customerToken", result.token)
         localStorage.setItem("customerId", result.customerId);
-        localStorage.setItem("customerName", result.name);
-        
+        localStorage.setItem("customerName", result.customerName);
+
 
         document.getElementById("auth-section").classList.add("hidden");
         document.getElementById("customer-dashboard").classList.remove("hidden");
@@ -1063,10 +1072,12 @@ function loadCustomerDashboard(customerId) {
     fetchCustomerPayments(customerId);
 }
 
+
 async function fetchCustomerBalance(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`, {
-            method: "GET"
+            method: "GET",
+            headers: getAuthHeaders()
         });
         if (!response.ok) throw new Error("Failed to fetch balance");
 
@@ -1084,8 +1095,9 @@ async function fetchCustomerBalance(customerId) {
 async function fetchCustomerOrders(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/orders/customer/${customerId}`, {
-            method: "GET"
-            
+            method: "GET",
+            headers: getAuthHeaders()
+
         });
         if (!response.ok) throw new Error("Failed to fetch orders");
 
@@ -1123,8 +1135,9 @@ async function fetchCustomerOrders(customerId) {
 async function fetchCustomerPayments(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/history`, {
-            method: "GET"
-            
+            method: "GET",
+            headers: getAuthHeaders()
+
         });
         if (!response.ok) throw new Error("Failed to fetch payments");
 
@@ -1154,6 +1167,38 @@ async function fetchCustomerPayments(customerId) {
     }
 }
 
+async function processCustomerPayment() {
+    const amountInput = document.getElementById('payment-amount');
+    const { customerId, balance } = currentPayment;
+    const amount = parseFloat(amountInput.value);
+
+    paymentMessage.textContent = '0';
+    paymentMessage.className = 'payment-message';
+
+    // Validation
+    if (isNaN(amount) || amount <= 0) {
+        showPaymentMessage('Please enter a valid positive amount', 'error');
+        amountInput.focus();
+        return;
+    }
+
+    if (amount > balance) {
+        showPaymentMessage(`Amount cannot exceed ₹${balance.toFixed(2)}`, 'error');
+        amountInput.focus();
+        return;
+    }
+    try {
+        const response = await fetch(`${BASE_URL}/api/payments/customer`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                amount: amount
+            })
+        })
+    } catch (error) {
+
+    }
+}
 
 
 function showCustomerAuthMessage(msg, type) {
@@ -1175,5 +1220,6 @@ function logoutCustomer() {
 }
 
 function openPaymentModal() {
+    
     showPaymentModal();
 }

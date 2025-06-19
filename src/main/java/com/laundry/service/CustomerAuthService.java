@@ -1,12 +1,11 @@
 package com.laundry.service;
 
-import com.laundry.dto.CustomerLoginRequest;
-import com.laundry.dto.CustomerLoginResponse;
-import com.laundry.dto.CustomerRegisterRequest;
+import com.laundry.dto.*;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerLogin;
 import com.laundry.repo.CustomerLoginRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,7 @@ public class CustomerAuthService {
     private final CustomerLoginRepository loginRepo;
     private final CustomerRepository customerRepo;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public String register(CustomerRegisterRequest request){
         String phone=request.getPhoneNumber();
@@ -46,16 +46,17 @@ public class CustomerAuthService {
         return "registration Successful";
     }
 
-    public CustomerLoginResponse login(String phoneNumber, String password){
-        Customer customer=customerRepo.findByPhoneNumber(phoneNumber).orElseThrow(()-> new RuntimeException("Invalid phone number"));
+    public JwtResponse login(CustomerLoginRequest request){
+        Customer customer=customerRepo.findByPhoneNumber(request.getPhoneNumber()).orElseThrow(()-> new RuntimeException("Invalid phone number"));
 
         CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new RuntimeException("No account found"));
 
-        if (!passwordEncoder.matches(password, login.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), login.getPassword())){
             throw new RuntimeException("Invalid phone number and password");
         }
+        String token=jwtUtil.generateToken(login.getPhoneNumber());
 
-        return new CustomerLoginResponse(customer.getId(), customer.getName());
+        return new JwtResponse(token, login.getId(), customer.getName());
 
 
     }
