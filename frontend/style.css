@@ -209,7 +209,6 @@ input[type="radio"] {
 
 input[type="radio"] {
     accent-color: #4CAF50;
-    /* Green selection */
     transform: scale(1.2);
 }
 
