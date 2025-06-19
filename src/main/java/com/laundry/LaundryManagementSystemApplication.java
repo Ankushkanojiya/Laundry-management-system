@@ -33,17 +33,5 @@ public class LaundryManagementSystemApplication {
 		};
 	}
 
-//	@Bean
-//	public WebMvcConfigurer corsConfigurer() {
-//		return new WebMvcConfigurer() {
-//			@Override
-//			public void addCorsMappings(CorsRegistry registry) {
-//				registry.addMapping("/**")
-//						.allowedOrigins("http://localhost:5500") // VS Code port
-//						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-//						.allowedHeaders("*")
-//						.allowCredentials(true);
-//			}
-//		};
-//	}
+
 }
