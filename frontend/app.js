@@ -9,6 +9,11 @@ const BASE_URL = 'http://localhost:8080';
 
 // });
 
+let whoIsPaying = "";
+let paymentCustomerId = null;
+let paymentCustomerName = "";
+let paymentBalance = 0;
+let currentCustomerBalance = 0;
 
 async function loadStats() {
     console.log("📊 loadStats() called...");
@@ -59,7 +64,7 @@ function formatDateTime(timestamp) {
     });
 }
 
-let paymentMode="";
+let paymentMode = "";
 // Login function
 async function login() {
     console.log("Login initiated....");
@@ -823,18 +828,11 @@ let currentPayment = {
 
 // Show payment modal
 function showPaymentModal(customerId, customerName, balance) {
-    // for customer side — use localStorage
-    if (!customerId) {
+    whoIsPaying = "admin";
+    paymentCustomerId = customerId;
+    paymentCustomerName = customerName;
+    paymentBalance = balance;
 
-        customerId = localStorage.getItem("customerId");
-        customerName = localStorage.getItem("customerName");
-        balance = parseFloat(document.getElementById("customer-balance").textContent);
-    }
-    currentPayment = {
-        customerId,
-        customerName,
-        balance
-    };
 
     // Update modal UI
     document.getElementById('payment-customer-name').textContent = customerName;
@@ -847,6 +845,18 @@ function showPaymentModal(customerId, customerName, balance) {
     modal.classList.add('modal--active');
 }
 
+function showCustomerPaymentModal(balance) {
+    whoIsPaying = "customer";
+    paymentCustomerId = localStorage.getItem("customerId");
+    paymentCustomerName = localStorage.getItem("customerName");
+    paymentBalance = balance;
+
+    document.getElementById("payment-customer-name").textContent = paymentCustomerName;
+    document.getElementById("payment-total-due").textContent = `₹${balance.toFixed(2)}`;
+    document.getElementById("payment-amount").value = "";
+    document.getElementById("payment-modal").classList.remove("hidden");
+}
+
 // Close modal
 function closePaymentModal() {
     const modal = document.getElementById('payment-modal');
@@ -854,13 +864,16 @@ function closePaymentModal() {
     modal.classList.remove('modal--active');
 }
 
+
+
 // Process payment
 const paymentMessage = document.getElementById('payment-message');
 async function processPayment() {
     const amountInput = document.getElementById('payment-amount');
-    const { customerId, balance } = currentPayment;
-    const amount = parseFloat(amountInput.value);
 
+    const amount = parseFloat(amountInput.value);
+    const balance = paymentBalance;
+    const customerId = paymentCustomerId;
     paymentMessage.textContent = '0';
     paymentMessage.className = 'payment-message';
 
@@ -878,33 +891,54 @@ async function processPayment() {
     }
 
     try {
-        // Call backend API
-        const response = await fetch(`${BASE_URL}/api/payments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                customerId: customerId,
-                amount: amount
-            }),
-            credentials: "include"
-        });
+        // Call admin API
+        if (whoIsPaying === "admin") {
+            const response = await fetch(`${BASE_URL}/api/payments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customerId: paymentCustomerId,
+                    amount: amount
+                }),
+                credentials: "include"
+            });
 
-        if (!response.ok) {
-            throw new Error(await response.text());
+            if (!response.ok) throw new Error("Admin payment failed");
+            showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+            refreshPayments();
+            loadStats();
+
+        } else if (whoIsPaying === "customer") {
+            const response = await fetch(`${BASE_URL}/api/payments/customer`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("customerToken")}`
+                },
+                body: JSON.stringify({ amount: amount })
+            });
+
+            if (!response.ok) throw new Error("Customer payment failed");
+            showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+            fetchCustomerBalance(customerId);
+            fetchCustomerOrders(customerId);
+            fetchCustomerPayments(customerId);
+
+        } else {
+            throw new Error("Unknown payment context");
         }
 
-        showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+
+
         setTimeout(() => {
             closePaymentModal();
-            refreshPayments();
+
         }, 1500);
         closePaymentModal();
 
-        refreshPayments();
-        loadStats();
-        fetchCustomerBalance(customerId);
-        fetchCustomerOrders(customerId);
-        fetchCustomerPayments(customerId);
+
+
+
 
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
@@ -1073,6 +1107,7 @@ function loadCustomerDashboard(customerId) {
 }
 
 
+
 async function fetchCustomerBalance(customerId) {
     try {
         const response = await fetch(`${BASE_URL}/api/payments/${customerId}/balance`, {
@@ -1081,7 +1116,9 @@ async function fetchCustomerBalance(customerId) {
         });
         if (!response.ok) throw new Error("Failed to fetch balance");
 
-        const balance = await response.json();
+
+        const balance = parseFloat(await response.text());
+        currentCustomerBalance = balance;
         const display = document.getElementById("customer-balance");
         display.textContent = balance.toFixed(2);
 
@@ -1220,6 +1257,6 @@ function logoutCustomer() {
 }
 
 function openPaymentModal() {
-    
+
     showPaymentModal();
 }
