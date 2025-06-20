@@ -819,12 +819,7 @@ function renderPaymentSummary(data) {
 
 
 
-// Track current payment context
-let currentPayment = {
-    customerId: null,
-    customerName: '',
-    balance: 0
-};
+
 
 // Show payment modal
 function showPaymentModal(customerId, customerName, balance) {
@@ -933,12 +928,7 @@ async function processPayment() {
         setTimeout(() => {
             closePaymentModal();
 
-        }, 1500);
-        closePaymentModal();
-
-
-
-
+        }, 2000);
 
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
@@ -993,6 +983,7 @@ async function showTransactionHistory(transactionData) {
         return;
     }
 
+    transactionData.sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp));
     tbody.innerHTML = transactionData.map(tData => {
 
         const timeDateStamp = formatDateTime(tData.timestamp);
@@ -1204,38 +1195,7 @@ async function fetchCustomerPayments(customerId) {
     }
 }
 
-async function processCustomerPayment() {
-    const amountInput = document.getElementById('payment-amount');
-    const { customerId, balance } = currentPayment;
-    const amount = parseFloat(amountInput.value);
 
-    paymentMessage.textContent = '0';
-    paymentMessage.className = 'payment-message';
-
-    // Validation
-    if (isNaN(amount) || amount <= 0) {
-        showPaymentMessage('Please enter a valid positive amount', 'error');
-        amountInput.focus();
-        return;
-    }
-
-    if (amount > balance) {
-        showPaymentMessage(`Amount cannot exceed ₹${balance.toFixed(2)}`, 'error');
-        amountInput.focus();
-        return;
-    }
-    try {
-        const response = await fetch(`${BASE_URL}/api/payments/customer`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({
-                amount: amount
-            })
-        })
-    } catch (error) {
-
-    }
-}
 
 
 function showCustomerAuthMessage(msg, type) {
