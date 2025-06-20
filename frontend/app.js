@@ -4,10 +4,28 @@
 const BASE_URL = 'http://localhost:8080';
 
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     console.log("DOM loaded. Waiting for login...");
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM loaded. Waiting for login...");
 
-// });
+    const token=localStorage.getItem("customerToken");
+    console.log(token);
+
+    if (token) {
+        const customerId=localStorage.getItem("customerId");
+        const customerName=localStorage.getItem("customerName");
+
+        if (customerId && customerName) {
+            
+            document.getElementById("auth-section").classList.add("hidden");
+            document.getElementById("customer-dashboard").classList.remove("hidden");
+
+            loadCustomerDashboard(customerId);
+        }else{
+            localStorage.clear();
+        }
+    }
+
+});
 
 let whoIsPaying = "";
 let paymentCustomerId = null;
@@ -1050,6 +1068,7 @@ async function registerCustomer() {
 async function loginCustomer() {
     const phone = document.getElementById('customer-phone-login').value.trim();
     const password = document.getElementById('customer-password-login').value.trim();
+    
 
     if (!phone || !password) {
         showCustomerAuthMessage("Please enter phone and password", "error");
@@ -1089,6 +1108,7 @@ async function loginCustomer() {
 }
 
 function loadCustomerDashboard(customerId) {
+    
     const name = localStorage.getItem("customerName");
     document.getElementById("customer-name-display").textContent = name;
 
@@ -1205,10 +1225,8 @@ function showCustomerAuthMessage(msg, type) {
 }
 
 function logoutCustomer() {
-    localStorage.removeItem("customerId");
-    localStorage.removeItem("customerName");
-    localStorage.removeItem("customerPhone");
 
+    localStorage.clear();
     // Hide dashboard, show login form
     document.getElementById("customer-dashboard").classList.add("hidden");
     document.getElementById("auth-section").classList.remove("hidden");
