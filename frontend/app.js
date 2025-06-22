@@ -7,20 +7,20 @@ const BASE_URL = 'http://localhost:8080';
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM loaded. Waiting for login...");
 
-    const token=localStorage.getItem("customerToken");
+    const token = localStorage.getItem("customerToken");
     console.log(token);
 
     if (token) {
-        const customerId=localStorage.getItem("customerId");
-        const customerName=localStorage.getItem("customerName");
+        const customerId = localStorage.getItem("customerId");
+        const customerName = localStorage.getItem("customerName");
 
         if (customerId && customerName) {
-            
+
             document.getElementById("auth-section").classList.add("hidden");
             document.getElementById("customer-dashboard").classList.remove("hidden");
 
             loadCustomerDashboard(customerId);
-        }else{
+        } else {
             localStorage.clear();
         }
     }
@@ -1001,7 +1001,7 @@ async function showTransactionHistory(transactionData) {
         return;
     }
 
-    transactionData.sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp));
+    transactionData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     tbody.innerHTML = transactionData.map(tData => {
 
         const timeDateStamp = formatDateTime(tData.timestamp);
@@ -1068,7 +1068,7 @@ async function registerCustomer() {
 async function loginCustomer() {
     const phone = document.getElementById('customer-phone-login').value.trim();
     const password = document.getElementById('customer-password-login').value.trim();
-    
+
 
     if (!phone || !password) {
         showCustomerAuthMessage("Please enter phone and password", "error");
@@ -1108,7 +1108,7 @@ async function loginCustomer() {
 }
 
 function loadCustomerDashboard(customerId) {
-    
+
     const name = localStorage.getItem("customerName");
     document.getElementById("customer-name-display").textContent = name;
 
@@ -1238,3 +1238,59 @@ function openPaymentModal() {
 
     showPaymentModal();
 }
+
+function showCustomerProfile() {
+    document.getElementById("customer-profile-modal").classList.remove("hidden");
+    document.getElementById("customer-profile-message").textContent = "";
+    document.getElementById("old_password").value = " ";
+    document.getElementById("new_password").value = " ";
+}
+
+function closeCustomerProfileModal() {
+    document.getElementById("customer-profile-modal").classList.add("hidden");
+}
+
+const messageField = document.getElementById("customer-profile-message").textContent = "";
+async function submitPasswordChange() {
+    const old_password = document.getElementById('old_password').value.trim();
+    const new_password = document.getElementById("new_password").value.trim();
+
+    console.log("old", old_password);
+    console.log("mew", new_password);
+
+    
+
+    if (!old_password || !new_password) {
+        showProfileMessage("Please fill both fields","error");
+        
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${BASE_URL}/api/customer-auth/me/changePassword`, {
+            method: 'PATCH',
+            headers:getAuthHeaders(),
+            body: JSON.stringify({ oldPassword:old_password ,newPassword:new_password })
+        });
+        
+        const msg = await response.text();
+        showProfileMessage(msg, response.ok ? "success" : "error");
+        
+
+        if (response.ok) {
+            setTimeout(closeCustomerProfileModal, 2500);
+        }
+    } catch (error) {
+        
+
+    }
+}
+
+function showProfileMessage(message, type = "error") {
+    const messageBox = document.getElementById("customer-profile-message");
+    if (!messageBox) return;
+
+    messageBox.textContent = message;
+    messageBox.style.color = type === "success" ? "green" : "red";
+}
+

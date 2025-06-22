@@ -626,3 +626,7 @@ input[type="radio"] {
     border-radius: 5px;
     cursor: pointer;
 }
+#customer-profile-message {
+    margin: 10px 0;
+    font-weight: bold;
+}

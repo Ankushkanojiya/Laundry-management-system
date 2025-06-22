@@ -1,6 +1,6 @@
 package com.laundry.dto;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
 public class PasswordChangeRequest {
