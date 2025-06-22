@@ -7,6 +7,7 @@ import com.laundry.repo.CustomerLoginRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -61,4 +62,25 @@ public class CustomerAuthService {
 
     }
 
+    public String changePassword(PasswordChangeRequest request, String authHeader) {
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")){
+            throw new RuntimeException("Missing token");
+        }
+
+        String token=authHeader.substring(7);
+        String phone= jwtUtil.extractPhone(token);
+
+        Customer customer=customerRepo.findByPhoneNumber(phone).orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new RuntimeException("Customer Account is not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), login.getPassword())){
+            throw new RuntimeException("Incorrect current password");
+        }
+        login.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        loginRepo.save(login);
+
+        return "Successfully change password";
+    }
 }

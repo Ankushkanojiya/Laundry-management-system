@@ -1,17 +1,11 @@
 package com.laundry.controller;
 
-import com.laundry.dto.CustomerLoginRequest;
-import com.laundry.dto.CustomerLoginResponse;
-import com.laundry.dto.CustomerRegisterRequest;
-import com.laundry.dto.JwtResponse;
+import com.laundry.dto.*;
 import com.laundry.service.CustomerAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -30,9 +24,12 @@ public class CustomerAuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CustomerLoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
 
-
-            return ResponseEntity.ok(authService.login(request));
+    @PatchMapping("/me/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequest request, @RequestHeader("Authorization") String authHeader){
+        return ResponseEntity.ok(authService.changePassword(request,authHeader));
     }
 
 }

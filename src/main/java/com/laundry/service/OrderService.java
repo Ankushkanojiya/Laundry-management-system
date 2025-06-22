@@ -46,14 +46,8 @@ public class OrderService {
             default -> 10.00; // Regular wash
         };
 
-        CustomerAccount account = accountRepo.findByCustomer(customer)
-                .orElseGet(() -> {
-                    CustomerAccount newAccount = new CustomerAccount();
-                    newAccount.setCustomer(customer);
-                    newAccount.setBalance(0.0);
-                    return accountRepo.save(newAccount);
-                });
 
+        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new RuntimeException(" no customer found"));
         account.setBalance(account.getBalance() + totalAmount);
         accountRepo.save(account);
 

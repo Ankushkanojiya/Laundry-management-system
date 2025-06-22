@@ -57,7 +57,8 @@ public class SecurityConfig {
                                 "/api/payments/**",
                                 "/api/customers/**",
                                 "/api/customers",
-                                "api/payments/customer"
+                                "api/payments/customer",
+                                "api/customer-auth/me/**"
                         ).authenticated()
                         .anyRequest().permitAll()
                 )

@@ -42,6 +42,12 @@ public class CustomerService {
             Customer customer = new Customer();
             customer.setName(request.getName());
             customer.setPhoneNumber(request.getPhoneNumber());
+            customerRepo.save(customer);
+
+            CustomerAccount newAccount = new CustomerAccount();
+            newAccount.setCustomer(customer);
+            newAccount.setBalance(0.0);
+            accountRepo.save(newAccount);
 
             Customer saveCustomer = customerRepo.save(customer);
             return mapToResponse(saveCustomer);
