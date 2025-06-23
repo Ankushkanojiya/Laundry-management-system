@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "api/payments/customer",
                                 "api/customer-auth/me/**"
                         ).authenticated()
+                        .requestMatchers("/api/insights").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex
@@ -106,12 +107,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationManager authManager(HttpSecurity http, AdminUserDetailsService adminUserDetailsService) throws Exception{
-        AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authBuilder
-                .userDetailsService(adminUserDetailsService)
-                .passwordEncoder(passwordEncoder());
-        return authBuilder.build();
-    }
+//    @Bean
+//    public AuthenticationManager authManager(HttpSecurity http, AdminUserDetailsService adminUserDetailsService) throws Exception{
+//        AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authBuilder
+//                .userDetailsService(adminUserDetailsService)
+//                .passwordEncoder(passwordEncoder());
+//        return authBuilder.build();
+//    }
 }
