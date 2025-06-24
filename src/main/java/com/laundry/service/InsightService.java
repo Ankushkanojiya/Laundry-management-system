@@ -67,17 +67,17 @@ public class InsightService {
             }
         }
 
-        List<DueCustomers> dueCustomers=new ArrayList<>();
+        List<DueCustomers> customersWithDue=new ArrayList<>();
         List<CustomerAccount> accounts=accountRepo.findAll();
 
         for (CustomerAccount account:accounts){
             if (account.getBalance() > 0){
                 Customer customer=account.getCustomer();
                 DueCustomers due=new DueCustomers(customer.getId(),customer.getName(),account.getBalance());
-                dueCustomers.add(due);
+                customersWithDue.add(due);
             }
         }
 
-        return new InsightResponse(totalCustomer,totalRevenue,topCustomers,dueCustomers);
+        return new InsightResponse(totalCustomer,totalRevenue,topCustomers,customersWithDue);
     }
 }

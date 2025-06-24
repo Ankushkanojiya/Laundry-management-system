@@ -1258,30 +1258,29 @@ async function submitPasswordChange() {
     console.log("old", old_password);
     console.log("mew", new_password);
 
-    
+
 
     if (!old_password || !new_password) {
-        showProfileMessage("Please fill both fields","error");
-        
+        showProfileMessage("Please fill both fields", "error");
         return;
     }
-    
+
     try {
         const response = await fetch(`${BASE_URL}/api/customer-auth/me/changePassword`, {
             method: 'PATCH',
-            headers:getAuthHeaders(),
-            body: JSON.stringify({ oldPassword:old_password ,newPassword:new_password })
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ oldPassword: old_password, newPassword: new_password })
         });
-        
+
         const msg = await response.text();
         showProfileMessage(msg, response.ok ? "success" : "error");
-        
+
 
         if (response.ok) {
             setTimeout(closeCustomerProfileModal, 2500);
         }
     } catch (error) {
-        
+        showProfileMessage("Something went wrong","error");
 
     }
 }
@@ -1294,3 +1293,56 @@ function showProfileMessage(message, type = "error") {
     messageBox.style.color = type === "success" ? "green" : "red";
 }
 
+function showInsights() {
+    hideAllSections();
+     document.getElementById("stats-cards").classList.add("hidden");
+    document.getElementById("insights-section").classList.remove("hidden");
+    loadInsights();
+}
+
+
+async function loadInsights() {
+    try {
+        const response = await fetch(`${BASE_URL}/api/insights`, {
+            method: "GET",
+            credentials: "include"
+        })
+
+        if (!response.ok) {
+            console.error("failed to load insights");
+            return;
+        }
+
+        const data = await response.json();
+        console.log("insights:", data);
+
+
+        document.getElementById("total-customers").textContent = data.totalCustomers;
+        document.getElementById("total-revenue").textContent = `₹${data.totalRevenue.toFixed(2)}`;
+
+        const topBody = document.getElementById("top-customers-body");
+        topBody.innerHTML = "";
+        data.topCustomers.forEach(c => {
+            topBody.innerHTML += `
+            <tr>
+            <td>${c.name}</td>
+            <td>${c.totalPaid.toFixed(2)}</td>
+            </tr>`;
+        });
+
+        const dueBody = document.getElementById("due-customers-body");
+        dueBody.innerHTML = "";
+        data.customersWithDue.forEach(c => {
+            dueBody.innerHTML += `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>₹${c.balance.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+
+    } catch (error) {
+        console.error("error fetching insights",error);
+    }
+}

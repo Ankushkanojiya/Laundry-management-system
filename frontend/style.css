@@ -626,7 +626,18 @@ input[type="radio"] {
     border-radius: 5px;
     cursor: pointer;
 }
+
 #customer-profile-message {
     margin: 10px 0;
     font-weight: bold;
+}
+
+.total-customer-card{
+    background: #fff3cd;               
+    border-left: 5px solid #ffc107;
+}
+
+.total-revenue-card{
+    background: #cdfbff;               
+    border-left: 5px solid #ffc107;
 }
