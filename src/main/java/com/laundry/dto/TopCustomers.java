@@ -12,6 +12,4 @@ public class TopCustomers {
     private Long id;
     private String name;
     private double totalPaid;
-
-
 }
