@@ -37,8 +37,8 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<?> recordPayment(@RequestBody PaymentRequest request) {
         try{
-            paymentService.recordPayment(request);
-            return ResponseEntity.ok().build();
+            PaymentTransactionDTO paymentDto=paymentService.recordPayment(request);
+            return ResponseEntity.ok(paymentDto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

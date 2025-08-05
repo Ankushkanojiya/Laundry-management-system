@@ -10,11 +10,13 @@ import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.PaymentTransactionHistory;
 import com.laundry.security.JwtUtil;
+import com.laundry.util.ReceiptGenerator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void recordPayment(PaymentRequest request){
+    public PaymentTransactionDTO recordPayment(PaymentRequest request){
         // validate customer exists or not
         Customer customer=customerRepo.findById(request.getCustomerId()).orElseThrow(()-> new RuntimeException("Customer not found"));
         // check is there account
@@ -54,7 +56,7 @@ public class PaymentService {
         if (account.getBalance()==0){
             orderService.completeAllOrders(account.getCustomer());
         }
-        paymentHistory(account, request);
+        return paymentHistory(account, request);
 
     }
 
@@ -65,6 +67,13 @@ public class PaymentService {
         transactions.setAmount(request.getAmount());
         transactions.setTimestamp(LocalDateTime.now());
         PaymentTransactions savedTransaction = transactionRepo.save(transactions);
+
+        try {
+            String path= ReceiptGenerator.generateReceipt(savedTransaction);
+            savedTransaction.setPdfPath(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return new PaymentTransactionDTO(savedTransaction);
 
     }

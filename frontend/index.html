@@ -391,6 +391,7 @@
                             <th>ID</th>
                             <th>Amount</th>
                             <th>Date</th>
+                            <th>Receipt</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -417,6 +418,18 @@
             <div class="modal-actions">
                 <button onclick="submitPasswordChange()">Update Password</button>
             </div>
+        </div>
+
+    </div>
+
+    <div id="invoice-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeInvoiceModal()">&times;</span>
+            <h3>Payment Receipt</h3>
+            <div id="invoice-content"></div>
+            <!-- <a id="download-receipt" href="#" download class="download-button">Download</a> -->
+            <a id="download-receipt" target="_blank" class="download-btn">Download Receipt 📄</a>
+            
         </div>
     </div>
 

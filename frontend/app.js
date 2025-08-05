@@ -27,6 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const modal = document.getElementById("invoice-modal");
+    const invoiceDiv = document.getElementById("invoice-content");
+
+    if (!modal || !invoiceDiv) {
+        console.error("invoice modal structure missing in DOM!");
+    }
+    
+   
+});
+
+
 let whoIsPaying = "";
 let paymentCustomerId = null;
 let paymentCustomerName = "";
@@ -310,6 +323,7 @@ async function refreshCustomers() {
                         <button class="history-btn" 
                         onclick="viewOrders(${customer.id}, '${customer.name}')">📜 Orders</button>
                         <button onClick="viewTransactions(${customer.id}, '${customer.name}')"> Transactions</button>
+
                     </td>
                 </tr>
             `).join('');
@@ -904,8 +918,10 @@ async function processPayment() {
     }
 
     try {
+         
         // Call admin API
-        if (whoIsPaying === "admin") {
+        if (whoIsPaying === "admin"){ 
+            console.log("enter the process");
             const response = await fetch(`${BASE_URL}/api/payments`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -917,12 +933,18 @@ async function processPayment() {
             });
 
             if (!response.ok) throw new Error("Admin payment failed");
-            showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+            console.log("enter the invoice"); //this line get printed on console after that error is still same
+            
+            showPaymentMessage(`Payment of ₹${amount} recorded!`, 'success');
+            let savedPayment=await response.json();
+            console.log("🧾 Showing invoice modal for:", savedPayment);
+            showInvoiceModal(savedPayment);
             refreshPayments();
             loadStats();
 
+
         } else if (whoIsPaying === "customer") {
-            const response = await fetch(`${BASE_URL}/api/payments/customer`, {
+            let response = await fetch(`${BASE_URL}/api/payments/customer`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -932,6 +954,8 @@ async function processPayment() {
             });
 
             if (!response.ok) throw new Error("Customer payment failed");
+            
+            
             showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
             fetchCustomerBalance(customerId);
             fetchCustomerOrders(customerId);
@@ -941,7 +965,7 @@ async function processPayment() {
             throw new Error("Unknown payment context");
         }
 
-
+        
 
         setTimeout(() => {
             closePaymentModal();
@@ -950,6 +974,54 @@ async function processPayment() {
 
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
+        console.log(error.message);
+    }
+}
+console.log("About to show invoice...");
+console.log("Invoice modal exists?", document.getElementById("invoice-modal"));
+console.log("Invoice content exists?", document.getElementById("invoice-content"));
+
+function showInvoiceModal(payment){
+    console.log("🧾 Showing invoice modal for:", payment);
+
+    const invoiceDiv   = document.getElementById("invoice-content");
+    const modal        = document.getElementById("invoice-modal");
+    const downloadLink = document.getElementById("download-receipt");
+    if (!invoiceDiv || !modal || !downloadLink) {
+    console.error("❌ invoice-content, invoice-modal or download-receipt not in DOM");
+    return;
+  }
+    const date = new Date(payment.timestamp).toLocaleString('en-IN', {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: true
+    });
+
+    const transactionId=payment.transactionId;
+    const customerName=payment.customerName;
+    const amount=payment.amount;
+
+    invoiceDiv.innerHTML = `
+        <p><strong>Receipt No:</strong> #${transactionId}</p>
+        <p><strong>Customer:</strong> ${customerName}</p>
+        <p><strong>Date:</strong> ${date}</p>
+        <p><strong>Amount Paid:</strong> ₹${amount}</p>
+        
+    `;
+    console.log("printed the innerhtml");
+    if (downloadLink) {
+        downloadLink.href = `${BASE_URL}/api/receipts/${payment.transactionId}/download`;
+        downloadLink.setAttribute("download", `receipt_${payment.transactionId}.pdf`);
+    }
+    
+    console.log("Download link");
+    modal.classList.remove("hidden");
+    modal.classList.add("modal--active");
+}
+function closeInvoiceModal() {
+    const modal = document.getElementById("invoice-modal");
+    if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("modal--active");
     }
 }
 
@@ -1011,6 +1083,19 @@ async function showTransactionHistory(transactionData) {
             <td>${tData.transactionId}</td>
             <td>${tData.amount.toFixed(2)}</td>
             <td>${timeDateStamp}</td>
+            <td>
+               <button 
+                class="view-btn" 
+                onclick='showInvoiceModal({
+                    transactionId: ${tData.transactionId}, 
+                    customerName: "${tData.customerName}", 
+                    amount: ${tData.amount}, 
+                    timestamp: "${tData.timestamp}"
+                })'>
+                View
+                </button>
+
+            </td>
         </tr>
     `;
     }).join('');
