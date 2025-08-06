@@ -86,9 +86,9 @@ public class PaymentService {
     }
 
     @Transactional
-    public String recordCustomerPayment(PaymentRequest request, String authHeader) {
+    public PaymentTransactionDTO recordCustomerPayment(PaymentRequest request, String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            return "The invalid token";
+            return null;
         }
         String token=authHeader.substring(7);
         String phone=jwtUtil.extractPhone(token);
@@ -100,7 +100,8 @@ public class PaymentService {
         paymentRequest.setCustomerId(customer.getId());
         paymentRequest.setAmount(request.getAmount());
 
-        recordPayment(paymentRequest);
-        return "Payment Successful";
+        return recordPayment(paymentRequest);
+
+
     }
 }

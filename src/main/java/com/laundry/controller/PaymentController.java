@@ -63,7 +63,7 @@ public class PaymentController {
         return ResponseEntity.ok(account.getBalance());
     }
     @PostMapping("/customer")
-    public ResponseEntity<String> recordCustomerPayment(@RequestBody PaymentRequest request,@RequestHeader("Authorization") String authHeader){
+    public ResponseEntity<PaymentTransactionDTO> recordCustomerPayment(@RequestBody PaymentRequest request,@RequestHeader("Authorization") String authHeader){
         return ResponseEntity.ok(paymentService.recordCustomerPayment(request,authHeader));
     }
 }

@@ -944,7 +944,7 @@ async function processPayment() {
 
 
         } else if (whoIsPaying === "customer") {
-            let response = await fetch(`${BASE_URL}/api/payments/customer`, {
+            const response = await fetch(`${BASE_URL}/api/payments/customer`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -957,6 +957,9 @@ async function processPayment() {
             
             
             showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
+            let savedPayment=await response.json();
+            console.log("🧾 Showing invoice modal for:", savedPayment);
+            showInvoiceModal(savedPayment);
             fetchCustomerBalance(customerId);
             fetchCustomerOrders(customerId);
             fetchCustomerPayments(customerId);
@@ -1292,6 +1295,18 @@ async function fetchCustomerPayments(customerId) {
                 <td>${txn.transactionId}</td>
                 <td>₹${txn.amount}</td>
                 <td>${formatDateTime(txn.timestamp)}</td>
+                <td>
+                <button 
+                class="view-btn" 
+                onclick='showInvoiceModal({
+                    transactionId: ${txn.transactionId}, 
+                    customerName: "${txn.customerName}", 
+                    amount: ${txn.amount}, 
+                    timestamp: "${txn.timestamp}"
+                })'>
+                View
+                </button>
+                </td>
             `;
             tbody.appendChild(row);
         }
