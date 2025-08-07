@@ -6,15 +6,18 @@ import com.laundry.dto.PaymentTransactionDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
+import com.laundry.model.PendingCustomerPayment;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.PaymentTransactionHistory;
+import com.laundry.repo.PendingCustomerPaymentRepository;
 import com.laundry.service.OrderService;
 import com.laundry.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/api/payments")
@@ -27,6 +30,7 @@ public class PaymentController {
     private final CustomerRepository customerRepo;
     private final PaymentService paymentService;
     private final PaymentTransactionHistory transactionRepo;
+    private final PendingCustomerPaymentRepository pendingRepo;
 
 
     @GetMapping
@@ -62,8 +66,34 @@ public class PaymentController {
 
         return ResponseEntity.ok(account.getBalance());
     }
-    @PostMapping("/customer")
-    public ResponseEntity<PaymentTransactionDTO> recordCustomerPayment(@RequestBody PaymentRequest request,@RequestHeader("Authorization") String authHeader){
-        return ResponseEntity.ok(paymentService.recordCustomerPayment(request,authHeader));
+//    @PostMapping("/customer")
+//    public ResponseEntity<PaymentTransactionDTO> recordCustomerPayment(@RequestBody PaymentRequest request,@RequestHeader("Authorization") String authHeader){
+//        return ResponseEntity.ok(paymentService.recordCustomerPayment(request,authHeader));
+//    }
+    @PostMapping("/pending")
+    public ResponseEntity<PaymentTransactionDTO> recordPendingPayments(@RequestBody PaymentRequest request, @RequestHeader("Authorization") String authHeader){
+        try{
+            PaymentTransactionDTO dto=paymentService.recordPendingCustomerPayment(request,authHeader);
+            return ResponseEntity.ok(dto);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<PaymentTransactionDTO>> getAllPendingPayments(){
+        List<PaymentTransactionDTO> pendingPayments=paymentService.getAllPendingPayments();
+        return ResponseEntity.ok(pendingPayments);
+
+    }
+
+    @PatchMapping("/{transactionId}/verify")
+    public ResponseEntity<?> verifyPendingPayments(@PathVariable Long transactionId){
+        try {
+            PaymentTransactionDTO verifyPayment=paymentService.verifyAndConfirmPendingPayments(transactionId);
+            return ResponseEntity.ok(verifyPayment);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

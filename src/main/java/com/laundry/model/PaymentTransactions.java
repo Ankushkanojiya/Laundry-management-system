@@ -24,5 +24,11 @@ public class PaymentTransactions {
     @Column(name = "pdf_path")
     private String pdfPath;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
+    public enum PaymentStatus {
+        PENDING,
+        CONFIRMED
+    }
 }

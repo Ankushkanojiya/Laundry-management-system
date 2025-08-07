@@ -6,9 +6,11 @@ import com.laundry.dto.PaymentTransactionDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
+import com.laundry.model.PendingCustomerPayment;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.PaymentTransactionHistory;
+import com.laundry.repo.PendingCustomerPaymentRepository;
 import com.laundry.security.JwtUtil;
 import com.laundry.util.ReceiptGenerator;
 import jakarta.transaction.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +30,7 @@ public class PaymentService {
     private final CustomerRepository customerRepo;
     private final OrderService orderService;
     private final PaymentTransactionHistory transactionRepo;
+    private final PendingCustomerPaymentRepository pendingRepo;
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -66,6 +70,7 @@ public class PaymentService {
         transactions.setAccount(account);
         transactions.setAmount(request.getAmount());
         transactions.setTimestamp(LocalDateTime.now());
+        transactions.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
         PaymentTransactions savedTransaction = transactionRepo.save(transactions);
 
         try {
@@ -85,23 +90,95 @@ public class PaymentService {
                 .toList();
     }
 
+//    @Transactional
+//    public PaymentTransactionDTO recordCustomerPayment(PaymentRequest request, String authHeader) {
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")){
+//            return null;
+//        }
+//        String token=authHeader.substring(7);
+//        String phone=jwtUtil.extractPhone(token);
+//
+//        Customer customer = customerRepo.findByPhoneNumber(phone)
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//
+//        PaymentRequest paymentRequest=new PaymentRequest();
+//        paymentRequest.setCustomerId(customer.getId());
+//        paymentRequest.setAmount(request.getAmount());
+//
+//        return recordPayment(paymentRequest);
+//
+//
+//    }
     @Transactional
-    public PaymentTransactionDTO recordCustomerPayment(PaymentRequest request, String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            return null;
+    public PaymentTransactionDTO recordPendingCustomerPayment(PaymentRequest request,String authHeader){
+        if (authHeader ==null || !authHeader.startsWith("Bearer ")){
+            throw new RuntimeException("invalid token");
         }
+
         String token=authHeader.substring(7);
         String phone=jwtUtil.extractPhone(token);
 
         Customer customer = customerRepo.findByPhoneNumber(phone)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        PaymentRequest paymentRequest=new PaymentRequest();
-        paymentRequest.setCustomerId(customer.getId());
-        paymentRequest.setAmount(request.getAmount());
+        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new RuntimeException("Account is not found"));
 
-        return recordPayment(paymentRequest);
+        PendingCustomerPayment pending = PendingCustomerPayment.builder()
+                .account(account)
+                .amount(request.getAmount())
+                .timestamp(LocalDateTime.now())
+                .build();
+        pending=pendingRepo.save(pending);
+        return new PaymentTransactionDTO(pending);
+    }
+
+    public PaymentTransactionDTO verifyAndConfirmPendingPayments(Long transactionId) {
+
+        PendingCustomerPayment pending=pendingRepo.findById(transactionId)
+                .orElseThrow(()->new RuntimeException("Payment Details not found"));
 
 
+        CustomerAccount account=pending.getAccount();
+
+        // this is where we put the payment deduction
+
+        double currentBalance=account.getBalance();
+        double payAmount=pending.getAmount();
+
+        account.setBalance(currentBalance-payAmount);
+
+        PaymentTransactions condfirmPayment=new PaymentTransactions();
+        condfirmPayment.setAccount(pending.getAccount());
+        condfirmPayment.setAmount(pending.getAmount());
+        condfirmPayment.setTimestamp(pending.getTimestamp());
+        condfirmPayment.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
+
+        PaymentTransactions saveTransaction=transactionRepo.save(condfirmPayment);
+
+        //Generate the receipt
+
+        try{
+            String pdfPath=ReceiptGenerator.generateReceipt(saveTransaction);
+            saveTransaction.setPdfPath(pdfPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate receipt");
+        }
+
+        accountRepo.save(account);
+        transactionRepo.save(saveTransaction);
+
+        pendingRepo.delete(pending);
+
+        return new PaymentTransactionDTO(saveTransaction);
+    }
+
+    public List<PaymentTransactionDTO> getAllPendingPayments() {
+        List<PendingCustomerPayment> pendingPayments = pendingRepo.findAll();
+        List<PaymentTransactionDTO> pendingList = new ArrayList<>();
+
+        for (PendingCustomerPayment list : pendingPayments) {
+            pendingList.add(new PaymentTransactionDTO(list));
+        }
+        return pendingList;
     }
 }

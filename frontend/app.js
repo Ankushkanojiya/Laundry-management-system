@@ -944,7 +944,7 @@ async function processPayment() {
 
 
         } else if (whoIsPaying === "customer") {
-            const response = await fetch(`${BASE_URL}/api/payments/customer`, {
+            const response = await fetch(`${BASE_URL}/api/payments/pending`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -1446,3 +1446,84 @@ async function loadInsights() {
         console.error("error fetching insights",error);
     }
 }
+
+async function showCustomerPayments() {
+    console.log(document.getElementById("customer-payment-section"));
+    hideAllSections();
+    document.getElementById('customer-payment-section').classList.remove('hidden');
+    customerPayments();
+
+}
+
+async function customerPayments() {
+    try {
+        const response=await fetch(`${BASE_URL}/api/payments/pending`,{
+            method:'GET',
+            credentials:'include'
+
+        });
+        const data = await response.json();
+        renderCustomerPayments(data);
+    } catch (error) {
+        console.error("falied to load paymetns",error);
+    }
+}
+function renderCustomerPayments(payments) {
+    const tbody = document.querySelector('#customer-payments-table tbody');
+    tbody.innerHTML = '';
+
+    if (!payments.length) {
+        tbody.innerHTML = `<tr><td colspan="6">No pending payments</td></tr>`;
+        return;
+    }
+
+    payments.forEach(payment => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${payment.transactionId}</td>
+            <td>${payment.customerName}</td>
+            <td>₹${payment.amount.toFixed(2)}</td>
+            <td>${formatDateTime(payment.timestamp)}</td>
+            <td>${payment.status}</td>
+            <td>
+                <button onclick="verifyPendingPayment(${payment.transactionId}, this)">Verify</button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+async function verifyPendingPayment(pendingId, button) {
+    try {
+        button.disabled = true;
+        button.textContent = "Verifying...";
+
+        const response = await fetch(`${BASE_URL}/api/payments/${pendingId}/verify`, {
+            method: "PATCH",
+            credentials: "include"
+        });
+
+        if (!response.ok) throw new Error("Failed to verify");
+
+        const updated = await response.json();
+
+        const row = button.closest("tr");
+        row.innerHTML = `
+            <td>${updated.transactionId}</td>
+            <td>${updated.customerName}</td>
+            <td>₹${updated.amount.toFixed(2)}</td>
+            <td>${formatDateTime(updated.timestamp)}</td>
+            <td>${updated.status}</td>
+            <td><a class="download-btn" href="${BASE_URL}/api/receipts/${updated.transactionId}/download" target="_blank">Download 📄</a></td>
+        `;
+
+        showMessage("Verified and receipt generated ✅", "success");
+    } catch (error) {
+        showMessage("Verification failed ❌", "error");
+        button.disabled = false;
+        button.textContent = "Verify";
+    }
+}
+

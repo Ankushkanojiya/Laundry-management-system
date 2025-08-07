@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 "/api/customers/**",
                                 "/api/customers",
                                 "api/payments/customer",
+                                "api/payments/pending",
                                 "api/customer-auth/me/**"
                         ).authenticated()
                         .requestMatchers("/api/insights").hasRole("ADMIN")
