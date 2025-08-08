@@ -1,7 +1,7 @@
 
 //   Login  🔒
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -956,9 +956,8 @@ async function processPayment() {
                 amountInput.focus();
                 return;
             }
-            // THE UPI INTENT HIT
-            const upiLink = generateUpiDeepLink(amount);
-            window.location.href = upiLink;
+
+            launchUpiIntent(amount);
 
             setTimeout(() => {
                 if (confirm("Did you complete the UPI payment?")) {
@@ -966,7 +965,7 @@ async function processPayment() {
                 } else {
                     showPaymentMessage("Payment not recorded. Please try again.", "error");
                 }
-            }, 2000);
+            }, 5000);
             
 
         } else {
@@ -980,9 +979,26 @@ async function processPayment() {
     }
 }
 
+function launchUpiIntent(amount) {
+    
+    const txnRef = "TXN" + Date.now(); 
+
+    const upiLink = `upi://pay` +
+        `?pa=@oksbi` +  
+        `&pn=Rupesh` +                        
+        `&tr=${txnRef}` +                 
+        `&txnId=${txnRef}` +               
+        `&am=${amount}` +                 
+        `&cu=INR`;                        
+
+    console.log("Generated UPI Link:", upiLink);
+    window.location.href = upiLink; 
+}
+
+
 function generateUpiDeepLink(amount) {
-    const upiId = "stk-9454545985@okbizaxis";
-    const payeeName = "ok";
+    const upiId = "9619723090@ybl";
+    const payeeName = "rupesh";
     const currency = "INR";
     const note = "Laundry Payment";
 

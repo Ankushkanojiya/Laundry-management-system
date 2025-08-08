@@ -32,11 +32,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(cors-> cors.configurationSource(request -> {
                     CorsConfiguration config=new CorsConfiguration();
                         config.setAllowedOrigins(List.of(
-                                "http://localhost:5500"));
+                                "http://localhost:5500","http://localhost:8080"));
                     config.setAllowedMethods(List.of("GET","POST","DELETE","PUT","PATCH"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
@@ -98,6 +99,7 @@ public class SecurityConfig {
                             response.getWriter().write("{\"message\": \"Logout successful\"}");
                         })
                 );
+
 
 
         return http.build();
