@@ -28,15 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     const modal = document.getElementById("invoice-modal");
     const invoiceDiv = document.getElementById("invoice-content");
 
     if (!modal || !invoiceDiv) {
         console.error("invoice modal structure missing in DOM!");
     }
-    
-   
+
+
 });
 
 
@@ -918,9 +918,9 @@ async function processPayment() {
     }
 
     try {
-         
+
         // Call admin API
-        if (whoIsPaying === "admin"){ 
+        if (whoIsPaying === "admin") {
             console.log("enter the process");
             const response = await fetch(`${BASE_URL}/api/payments`, {
                 method: "POST",
@@ -934,9 +934,9 @@ async function processPayment() {
 
             if (!response.ok) throw new Error("Admin payment failed");
             console.log("enter the invoice"); //this line get printed on console after that error is still same
-            
+
             showPaymentMessage(`Payment of ₹${amount} recorded!`, 'success');
-            let savedPayment=await response.json();
+            let savedPayment = await response.json();
             console.log("🧾 Showing invoice modal for:", savedPayment);
             showInvoiceModal(savedPayment);
             refreshPayments();
@@ -944,64 +944,103 @@ async function processPayment() {
 
 
         } else if (whoIsPaying === "customer") {
-            const response = await fetch(`${BASE_URL}/api/payments/pending`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("customerToken")}`
-                },
-                body: JSON.stringify({ amount: amount })
-            });
+            const amount = parseFloat(document.getElementById("payment-amount").value);
 
-            if (!response.ok) throw new Error("Customer payment failed");
+            if (isNaN(amount) || amount <= 0) {
+                showPaymentMessage("Please enter a valid amount", "error");
+                return;
+            }
+
+            if (amount > balance) {
+                showPaymentMessage(`Amount cannot exceed ₹${balance.toFixed(2)}`, 'error');
+                amountInput.focus();
+                return;
+            }
+            // THE UPI INTENT HIT
+            const upiLink = generateUpiDeepLink(amount);
+            window.location.href = upiLink;
+
+            setTimeout(() => {
+                if (confirm("Did you complete the UPI payment?")) {
+                    sendPendingPayment(amount);
+                } else {
+                    showPaymentMessage("Payment not recorded. Please try again.", "error");
+                }
+            }, 2000);
             
-            
-            showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded!`, 'success');
-            let savedPayment=await response.json();
-            console.log("🧾 Showing invoice modal for:", savedPayment);
-            showInvoiceModal(savedPayment);
-            fetchCustomerBalance(customerId);
-            fetchCustomerOrders(customerId);
-            fetchCustomerPayments(customerId);
 
         } else {
             throw new Error("Unknown payment context");
         }
 
-        
-
-        setTimeout(() => {
-            closePaymentModal();
-
-        }, 2000);
 
     } catch (error) {
         showPaymentMessage(`Payment failed: ${error.message}`, 'error');
         console.log(error.message);
     }
 }
+
+function generateUpiDeepLink(amount) {
+    const upiId = "stk-9454545985@okbizaxis";
+    const payeeName = "ok";
+    const currency = "INR";
+    const note = "Laundry Payment";
+
+    return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(note)}`;
+}
+
+async function sendPendingPayment(amount) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/payments/pending`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("customerToken")}`
+            },
+            body: JSON.stringify({ amount: amount })
+        });
+
+        if (!response.ok) throw new Error("Customer payment failed");
+
+        const savedPayment = await response.json();
+
+        showPaymentMessage(`Payment of ₹${amount.toFixed(2)} recorded! Waiting for admin verification.`, "success");
+
+        console.log("🧾 Saved pending payment:", savedPayment);
+
+        fetchCustomerBalance(localStorage.getItem("customerId"));
+        fetchCustomerOrders(localStorage.getItem("customerId"));
+        fetchCustomerPayments(localStorage.getItem("customerId"));
+
+        closePaymentModal();
+    } catch (err) {
+        console.error(err);
+        showPaymentMessage("Failed to record payment. Please try again.", "error");
+    }
+}
+
 console.log("About to show invoice...");
 console.log("Invoice modal exists?", document.getElementById("invoice-modal"));
 console.log("Invoice content exists?", document.getElementById("invoice-content"));
 
-function showInvoiceModal(payment){
+function showInvoiceModal(payment) {
     console.log("🧾 Showing invoice modal for:", payment);
 
-    const invoiceDiv   = document.getElementById("invoice-content");
-    const modal        = document.getElementById("invoice-modal");
+    const invoiceDiv = document.getElementById("invoice-content");
+    const modal = document.getElementById("invoice-modal");
     const downloadLink = document.getElementById("download-receipt");
     if (!invoiceDiv || !modal || !downloadLink) {
-    console.error("❌ invoice-content, invoice-modal or download-receipt not in DOM");
-    return;
-  }
+        console.error("❌ invoice-content, invoice-modal or download-receipt not in DOM");
+        return;
+    }
     const date = new Date(payment.timestamp).toLocaleString('en-IN', {
         year: "numeric", month: "short", day: "numeric",
         hour: "2-digit", minute: "2-digit", hour12: true
     });
 
-    const transactionId=payment.transactionId;
-    const customerName=payment.customerName;
-    const amount=payment.amount;
+    const transactionId = payment.transactionId;
+    const customerName = payment.customerName;
+    const amount = payment.amount;
 
     invoiceDiv.innerHTML = `
         <p><strong>Receipt No:</strong> #${transactionId}</p>
@@ -1015,7 +1054,7 @@ function showInvoiceModal(payment){
         downloadLink.href = `${BASE_URL}/api/receipts/${payment.transactionId}/download`;
         downloadLink.setAttribute("download", `receipt_${payment.transactionId}.pdf`);
     }
-    
+
     console.log("Download link");
     modal.classList.remove("hidden");
     modal.classList.add("modal--active");
@@ -1380,7 +1419,7 @@ async function submitPasswordChange() {
             setTimeout(closeCustomerProfileModal, 2500);
         }
     } catch (error) {
-        showProfileMessage("Something went wrong","error");
+        showProfileMessage("Something went wrong", "error");
 
     }
 }
@@ -1395,7 +1434,7 @@ function showProfileMessage(message, type = "error") {
 
 function showInsights() {
     hideAllSections();
-     document.getElementById("stats-cards").classList.add("hidden");
+    document.getElementById("stats-cards").classList.add("hidden");
     document.getElementById("insights-section").classList.remove("hidden");
     loadInsights();
 }
@@ -1443,7 +1482,7 @@ async function loadInsights() {
 
 
     } catch (error) {
-        console.error("error fetching insights",error);
+        console.error("error fetching insights", error);
     }
 }
 
@@ -1457,15 +1496,15 @@ async function showCustomerPayments() {
 
 async function customerPayments() {
     try {
-        const response=await fetch(`${BASE_URL}/api/payments/pending`,{
-            method:'GET',
-            credentials:'include'
+        const response = await fetch(`${BASE_URL}/api/payments/pending`, {
+            method: 'GET',
+            credentials: 'include'
 
         });
         const data = await response.json();
         renderCustomerPayments(data);
     } catch (error) {
-        console.error("falied to load paymetns",error);
+        console.error("falied to load paymetns", error);
     }
 }
 function renderCustomerPayments(payments) {
