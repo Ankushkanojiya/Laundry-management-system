@@ -4,8 +4,43 @@
 const BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`;
 
 
+// Debug function to help track navigation
+function debugNav(sectionId, navText) {
+    console.group('Navigation Debug');
+    console.log('Section ID:', sectionId);
+    console.log('Nav Text:', navText);
+    const section = document.getElementById(sectionId);
+    console.log('Section found:', !!section);
+    const navItems = document.querySelectorAll('.admin-sidebar .nav-item');
+    console.log('Nav items found:', navItems.length);
+    navItems.forEach(item => {
+        const text = item.textContent.replace(/[\u{1F300}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|\s+/gu, ' ').trim();
+        console.log('Nav item text:', text, text === navText ? '(MATCH)' : '');
+    });
+    console.groupEnd();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM loaded. Waiting for login...");
+
+    // Initialize sections as hidden
+    const sections = [
+        'stats-cards',
+        'add-customer-section',
+        'take-order-section',
+        'manage-customers-section',
+        'manage-order-section',
+        'payments-section',
+        'customer-payment-section',
+        'insights-section'
+    ];
+    sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.add('hidden');
+            section.style.display = 'none';
+        }
+    });
 
     const token = localStorage.getItem("customerToken");
     console.log(token);
@@ -15,17 +50,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerName = localStorage.getItem("customerName");
 
         if (customerId && customerName) {
-
             document.getElementById("auth-section").classList.add("hidden");
             document.getElementById("customer-dashboard").classList.remove("hidden");
-
             loadCustomerDashboard(customerId);
         } else {
             localStorage.clear();
         }
     }
 
+    // Initialize mobile navigation state
+    const adminNav = document.querySelector('.admin-nav');
+    if (adminNav) {
+        // Enable horizontal scrolling for mobile
+        adminNav.addEventListener('scroll', () => {
+            const isStart = adminNav.scrollLeft === 0;
+            const isEnd = adminNav.scrollLeft + adminNav.clientWidth === adminNav.scrollWidth;
+            
+            adminNav.classList.toggle('at-start', isStart);
+            adminNav.classList.toggle('at-end', isEnd);
+        });
+    }
 });
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    sidebar.classList.toggle('active');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -80,7 +130,25 @@ function showTab(type) {
         adminForm.classList.add('hidden');
         customerTab.classList.add('active-tab');
         adminTab.classList.remove('active-tab');
+        // Show login section by default when switching to customer tab
+        toggleAuthMode('login');
     }
+}
+
+function toggleAuthMode(mode) {
+    const loginSection = document.getElementById('customer-login-section');
+    const registerSection = document.getElementById('customer-register-section');
+    
+    if (mode === 'login') {
+        loginSection.classList.remove('hidden');
+        registerSection.classList.add('hidden');
+    } else {
+        loginSection.classList.add('hidden');
+        registerSection.classList.remove('hidden');
+    }
+    
+    // Clear any existing messages
+    document.getElementById('customer-auth-message').textContent = '';
 }
 
 function formatDateTime(timestamp) {
@@ -125,15 +193,43 @@ async function login() {
         }
 
         // Only execute if login is successful
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('admin-form').classList.add('hidden');
+        // Hide auth section and show admin dashboard
+        document.getElementById('auth-section').style.display = 'none';
+        const adminDashboard = document.getElementById('admin-dashboard');
+        adminDashboard.classList.remove('hidden');
+        adminDashboard.style.display = 'block';
 
-        document.getElementById('admin-dashboard').classList.remove('hidden');
+        // Initialize the dashboard with default view
+        initializeDashboard();
 
-        document.getElementById("stats-cards").style.display = "grid";
+        // Initialize sidebar state
+        const sidebar = document.getElementById('admin-sidebar');
+        const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        
+        if (sidebarCollapsed) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
 
         loadStats();
         populateCustomerFilter();
+
+        // Add showDashboard function if it doesn't exist
+        if (typeof showDashboard !== 'function') {
+            window.showDashboard = function() {
+                hideAllSections();
+                const mainContent = document.getElementById('main-content');
+                mainContent.style.display = 'block';
+                
+                const statsCards = document.getElementById('stats-cards');
+                statsCards.classList.remove('hidden');
+                statsCards.style.display = 'grid';
+                
+                setActiveNavItem('Dashboard');
+                loadStats(); // Refresh dashboard stats
+                closeSidebar(); // Close sidebar after navigation
+            }
+        }
 
 
         hideAllSections(); // Hide all sections initially
@@ -145,14 +241,66 @@ async function login() {
 }
 
 async function logoutAdmin() {
-    await fetch(`${BASE_URL}/logout`, {
-        method: "POST",
-        credentials: "include"
-    });
+    try {
+        await fetch(`${BASE_URL}/logout`, {
+            method: "POST",
+            credentials: "include"
+        });
 
+        // Hide all sections
+        const sectionsToHide = [
+            "admin-dashboard",
+            "customer-dashboard",
+            "stats-cards",
+            "manage-customers-section",
+            "manage-order-section",
+            "payments-section",
+            "customer-payment-section",
+            "insights-section",
+            "add-customer-section",
+            "take-order-section"
+        ];
 
-    document.getElementById("admin-dashboard").classList.add("hidden");
-    document.getElementById("auth-section").classList.remove("hidden");
+        sectionsToHide.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                if (element.classList.contains('hidden')) {
+                    // Already hidden
+                } else {
+                    element.classList.add('hidden');
+                }
+            }
+        });
+
+        // Hide any open modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.classList.add('hidden');
+        });
+        
+        // Show auth section properly
+        const authSection = document.getElementById("auth-section");
+        authSection.style.display = "flex";
+        document.getElementById("admin-form").classList.remove("hidden");
+        document.getElementById("customer-form").classList.add("hidden");
+        
+        // Reset form fields
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("login-message").textContent = "";
+        
+        // Reset active tab
+        document.getElementById("tab-admin").classList.add("active-tab");
+        document.getElementById("tab-customer").classList.remove("active-tab");
+
+        // Clear any stored data
+        localStorage.removeItem('sidebarCollapsed');
+        
+    } catch (error) {
+        console.error('Logout failed:', error);
+        // Still attempt to show login screen even if logout request fails
+        document.getElementById("auth-section").style.display = "flex";
+    }
 }
 
 
@@ -232,9 +380,10 @@ async function editCustomer(id) {
         document.getElementById('edit-customer-phone').value = customer.phoneNumber;
         currentCustomerId = id;
 
-        document.getElementById('edit-customer-form').classList.remove('hidden');
-        document.getElementById('edit-customer-name').value = customer.name;
-        document.getElementById('edit-customer-phone').value = customer.phoneNumber;
+        // Show the modal
+        const modal = document.getElementById('edit-customer-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('modal--active');
     } catch (error) {
         showMessage(error.message, 'error');
     }
@@ -242,11 +391,9 @@ async function editCustomer(id) {
 
 // <!--   Update customer 🛠️🛠️🛠️🛠️🛠️🛠️  -->
 async function updateCustomer() {
-
     const name = document.getElementById('edit-customer-name').value.trim();
     const phone = document.getElementById('edit-customer-phone').value.trim();
     try {
-
         const response = await fetch(`${BASE_URL}/api/customers/${currentCustomerId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -258,11 +405,9 @@ async function updateCustomer() {
             throw new Error('Failed to update customer');
         }
 
-        // Show success message and hide form after 2 seconds
         showMessage('Customer updated successfully', 'success', 'edit-customer-message');
         setTimeout(() => {
-            document.getElementById('edit-customer-form').classList.add('hidden');
-            showMessage('', 'clear', 'edit-customer-message');
+            closeEditCustomerModal();
             refreshCustomers();
         }, 2000);
 
@@ -274,7 +419,7 @@ async function updateCustomer() {
 
 // Delete customer  ️🗑️🗑️🗑️
 async function deleteCustomer(id) {
-    if (!confirm('Are you sure you want to delete this customer?')) return;
+    if (!confirm('Are you sure you want to delete this customer? This action cannot be undone.')) return;
 
     try {
         const response = await fetch(`${BASE_URL}/api/customers/${id}`, {
@@ -287,55 +432,62 @@ async function deleteCustomer(id) {
         }
 
         showMessage('Customer deleted successfully', 'success');
+        closeEditCustomerModal();
         await refreshCustomers();
+        loadStats();
     } catch (error) {
-        showMessage(error.message, 'error');
+        showMessage(error.message, 'error', 'edit-customer-message');
     }
-    loadStats();
 }
 
 //  Refresh customer list 🔄🔄🔄🔄
 
 async function refreshCustomers() {
     try {
-
         const response = await fetch(`${BASE_URL}/api/customers`, {
             method: "GET",
             credentials: "include"
         });
         if (!response.ok) throw new Error('Failed to load customers');
 
-
         const customers = await response.json();
-        const tableBody = document.querySelector('#customer-table tbody');
+        const tableBody = document.querySelector('#customers-table-body');
         if (customers.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center">No Customers found</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center">No Customers found</td></tr>`;
             return;
         }
         tableBody.innerHTML = customers.map(customer => `
-                <tr>
-                    <td>${customer.id}</td>
-                    <td>${customer.name}</td>
-                    <td>${customer.phoneNumber}</td>
-                    <td>
-                        <button onclick="editCustomer(${customer.id})">Edit</button>
-                        <button onclick="deleteCustomer(${customer.id})">Delete</button>
-                        <button class="history-btn" 
-                        onclick="viewOrders(${customer.id}, '${customer.name}')">📜 Orders</button>
-                        <button onClick="viewTransactions(${customer.id}, '${customer.name}')"> Transactions</button>
-
-                    </td>
-                </tr>
-            `).join('');
+            <tr>
+                <td>#${customer.id}</td>
+                <td>${customer.name}</td>
+                <td>${customer.phoneNumber}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="viewOrders(${customer.id}, '${customer.name}')" class="view-orders-btn" title="View Orders">
+                            � Orders
+                        </button>
+                        <button onClick="viewTransactions(${customer.id}, '${customer.name}')" class="view-orders-btn" title="View Transactions">
+                            � Pay
+                        </button>
+                        <button onclick="editCustomer(${customer.id})" class="edit-btn" title="Edit Customer">
+                            ✏️ Edit
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
     } catch (error) {
         showMessage(error.message, 'error');
     }
 }
 
 //  Cancel Edit ❌❌❌
-function cancelEdit() {
-    document.getElementById('edit-customer-form').classList.add('hidden');
+function closeEditCustomerModal() {
+    const modal = document.getElementById('edit-customer-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('modal--active');
     currentCustomerId = null;
+    showMessage('', 'clear', 'edit-customer-message');
 }
 
 //  Reset form
@@ -360,9 +512,18 @@ function showMessage(message, type = 'info', elementId = 'action-message') {
 }
 
 
+function closeSidebar() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    sidebar.classList.remove('active');
+}
+
+function showDashboard() {
+    showSection('stats-cards', 'Dashboard');
+    loadStats(); // Refresh dashboard stats
+}
+
 function showTakeOrder() {
-    hideAllSections();
-    document.getElementById('take-order-section').classList.remove('hidden');
+    showSection('take-order-section', 'Take Order');
     loadCustomersForOrder(); // Load customers in dropdown
 }
 
@@ -467,25 +628,71 @@ function showCustomerManagement() {
 }
 
 function showAddCustomer() {
-    hideAllSections();
-    document.getElementById('add-customer-section').classList.remove('hidden');
+    showSection('add-customer-section', 'Add Customer');
 }
 
 function showManageCustomers() {
-    hideAllSections();
-    document.getElementById('manage-customers-section').classList.remove('hidden');
+    showSection('manage-customers-section', 'Manage Customers');
     refreshCustomers();
 }
 
+function setActiveNavItem(activeItem) {
+    // Remove active class from all nav items
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => item.classList.remove('active'));
+    
+    // Add active class to the clicked item
+    navItems.forEach(item => {
+        if (item.textContent.trim() === activeItem) {
+            item.classList.add('active');
+        }
+    });
+}
+
+function setActiveNavButton(buttonText) {
+    // Remove active class from all nav items
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => button.classList.remove('active'));
+    
+    // Find and activate the button with matching text
+    navButtons.forEach(button => {
+        if (button.textContent.trim() === buttonText) {
+            button.classList.add('active');
+        }
+    });
+}
+
 function hideAllSections() {
-    const sections = document.querySelectorAll('#admin-dashboard > div:not(.nav-buttons)');
-    sections.forEach(section => section.classList.add('hidden'));
+    const sections = [
+        'stats-cards',
+        'add-customer-section',
+        'take-order-section',
+        'manage-customers-section',
+        'manage-order-section',
+        'payments-section',
+        'customer-payment-section',
+        'insights-section'
+    ];
+    
+    // Hide all sections
+    sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.add('hidden');
+            section.style.display = 'none';
+        }
+    });
+
+    // Remove active state from all nav buttons
+    const navButtons = document.querySelectorAll('.nav-item');
+    navButtons.forEach(button => {
+        button.classList.remove('active');
+    });
 }
 
 async function showManageOrders() {
-    hideAllSections();
-    document.getElementById('manage-order-section').classList.remove('hidden');
-    await populateCustomerFilter()
+    showSection('manage-order-section', 'Show Orders');
+    await populateCustomerFilter();
     await refreshOrders();
 }
 
@@ -779,12 +986,63 @@ function closeHistory() {
 }
 
 
-async function showPayments() {
-    console.log(document.getElementById("payments-section"));
+// Helper function to show a section and set its nav button active
+function showSection(sectionId, navText) {
+    debugNav(sectionId, navText); // Add debugging
     hideAllSections();
-    document.getElementById('payments-section').classList.remove('hidden');
-    refreshPayments();
+    
+    // Show the selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.classList.remove('hidden');
+        section.style.display = sectionId === 'stats-cards' ? 'grid' : 'block';
+    }
+    
+    // Make sure main content is visible
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+        mainContent.style.display = 'block';
+    }
+    
+    // Set active state on the sidebar button
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        const itemContent = item.textContent.trim();
+        const itemText = itemContent.replace(/[^\x20-\x7E]/g, '').trim(); // Remove emojis and keep only printable ASCII
+        const buttonText = navText.trim();
+        
+        if (itemText === buttonText) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+    
+    closeSidebar();
+}
 
+function showPayments() {
+    showSection('payments-section', 'Payments');
+    refreshPayments();
+}
+
+// Called after successful login to set up initial dashboard state
+function initializeDashboard() {
+    const sections = {
+        'stats-cards': 'Dashboard',
+        'add-customer-section': 'Add Customer',
+        'take-order-section': 'Take Order',
+        'manage-customers-section': 'Manage Customers',
+        'manage-order-section': 'Show Orders',
+        'payments-section': 'Payments',
+        'insights-section': 'Insights',
+        'customer-payment-section': 'Customer Payments'
+    };
+
+    // Show dashboard initially
+    showSection('stats-cards', sections['stats-cards']);
+    loadStats();
+    populateCustomerFilter();
 }
 
 async function refreshPayments() {
@@ -1380,13 +1638,49 @@ function showCustomerAuthMessage(msg, type) {
 }
 
 function logoutCustomer() {
+    try {
+        // Clear all stored customer data
+        localStorage.clear();
 
-    localStorage.clear();
-    // Hide dashboard, show login form
-    document.getElementById("customer-dashboard").classList.add("hidden");
-    document.getElementById("auth-section").classList.remove("hidden");
+        // Hide all sections that might be open
+        const sectionsToHide = [
+            "customer-dashboard",
+            "customer-profile-modal",
+            "payment-modal",
+            "payment-transaction-history",
+            "customer-order-history"
+        ];
 
-    showTab("customer");
+        sectionsToHide.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.add('hidden');
+            }
+        });
+
+        // Reset all customer related data
+        document.getElementById("customer-balance").textContent = "0";
+        document.getElementById("customer-order-body").innerHTML = "";
+        document.getElementById("customer-payment-body").innerHTML = "";
+        
+        // Show auth section properly
+        const authSection = document.getElementById("auth-section");
+        authSection.style.display = "flex";
+        
+        // Switch to customer tab and show login form
+        showTab("customer");
+        toggleAuthMode('login');
+
+        // Clear any form fields
+        document.getElementById("customer-phone-login").value = "";
+        document.getElementById("customer-password-login").value = "";
+        document.getElementById("customer-auth-message").textContent = "";
+        
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Still attempt to show login screen
+        document.getElementById("auth-section").style.display = "flex";
+    }
 }
 
 function openPaymentModal() {
@@ -1449,9 +1743,7 @@ function showProfileMessage(message, type = "error") {
 }
 
 function showInsights() {
-    hideAllSections();
-    document.getElementById("stats-cards").classList.add("hidden");
-    document.getElementById("insights-section").classList.remove("hidden");
+    showSection('insights-section', 'Insights');
     loadInsights();
 }
 
@@ -1503,11 +1795,8 @@ async function loadInsights() {
 }
 
 async function showCustomerPayments() {
-    console.log(document.getElementById("customer-payment-section"));
-    hideAllSections();
-    document.getElementById('customer-payment-section').classList.remove('hidden');
+    showSection('customer-payment-section', 'Customer Payments');
     customerPayments();
-
 }
 
 async function customerPayments() {
