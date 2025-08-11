@@ -464,10 +464,10 @@ async function refreshCustomers() {
                 <td>
                     <div class="action-buttons">
                         <button onclick="viewOrders(${customer.id}, '${customer.name}')" class="view-orders-btn" title="View Orders">
-                            � Orders
+                            Orders
                         </button>
                         <button onClick="viewTransactions(${customer.id}, '${customer.name}')" class="view-orders-btn" title="View Transactions">
-                            � Pay
+                            Transactions
                         </button>
                         <button onclick="editCustomer(${customer.id})" class="edit-btn" title="Edit Customer">
                             ✏️ Edit
@@ -1130,16 +1130,34 @@ function showPaymentModal(customerId, customerName, balance) {
     modal.classList.add('modal--active');
 }
 
-function showCustomerPaymentModal(balance) {
+async function showCustomerPaymentModal() {
     whoIsPaying = "customer";
     paymentCustomerId = localStorage.getItem("customerId");
     paymentCustomerName = localStorage.getItem("customerName");
-    paymentBalance = balance;
 
-    document.getElementById("payment-customer-name").textContent = paymentCustomerName;
-    document.getElementById("payment-total-due").textContent = `₹${balance.toFixed(2)}`;
-    document.getElementById("payment-amount").value = "";
-    document.getElementById("payment-modal").classList.remove("hidden");
+    // Fetch the current balance
+    try {
+        const response = await fetch(`${BASE_URL}/api/payments/${paymentCustomerId}/balance`, {
+            method: "GET",
+            headers: getAuthHeaders()
+        });
+        if (!response.ok) throw new Error("Failed to fetch balance");
+        
+        const balance = parseFloat(await response.text());
+        paymentBalance = balance;
+
+        document.getElementById("payment-customer-name").textContent = paymentCustomerName;
+        document.getElementById("payment-total-due").textContent = `₹${balance.toFixed(2)}`;
+        document.getElementById("payment-amount").value = "";
+        
+        // Show modal with proper classes for animation and visibility
+        const modal = document.getElementById("payment-modal");
+        modal.classList.remove("hidden");
+        modal.classList.add("modal--active");
+    } catch (error) {
+        console.error("Error fetching balance:", error);
+        showMessage("Failed to load payment details", "error");
+    }
 }
 
 // Close modal
@@ -1200,6 +1218,10 @@ async function processPayment() {
             refreshPayments();
             loadStats();
 
+            setTimeout(() => {
+                closePaymentModal();
+            }, 2000);
+
 
         } else if (whoIsPaying === "customer") {
             const amount = parseFloat(document.getElementById("payment-amount").value);
@@ -1242,7 +1264,7 @@ function launchUpiIntent(amount) {
     const txnRef = "TXN" + Date.now(); 
 
     const upiLink = `upi://pay` +
-        `?pa=@oksbi` +  
+        `?pa=rupeshggupta951@oksbi` +  
         `&pn=Rupesh` +                        
         `&tr=${txnRef}` +                 
         `&txnId=${txnRef}` +               
@@ -1528,9 +1550,8 @@ async function fetchCustomerBalance(customerId) {
         });
         if (!response.ok) throw new Error("Failed to fetch balance");
 
-
         const balance = parseFloat(await response.text());
-        currentCustomerBalance = balance;
+        
         const display = document.getElementById("customer-balance");
         display.textContent = balance.toFixed(2);
 
@@ -1689,10 +1710,14 @@ function openPaymentModal() {
 }
 
 function showCustomerProfile() {
-    document.getElementById("customer-profile-modal").classList.remove("hidden");
+    const modal = document.getElementById("customer-profile-modal");
+    modal.classList.remove("hidden");
+    modal.classList.add("modal--active");  // Add this line to properly show the modal
+    
+    // Clear any previous messages and form values
     document.getElementById("customer-profile-message").textContent = "";
-    document.getElementById("old_password").value = " ";
-    document.getElementById("new_password").value = " ";
+    document.getElementById("old_password").value = "";
+    document.getElementById("new_password").value = "";
 }
 
 function closeCustomerProfileModal() {
@@ -1770,6 +1795,11 @@ async function loadInsights() {
 
         const topBody = document.getElementById("top-customers-body");
         topBody.innerHTML = "";
+
+        if (!data.topCustomers || data.topCustomers.length === 0) {
+            topBody.innerHTML = `<tr><td colspan="2">No top customers found</td></tr>`;
+        }
+        
         data.topCustomers.forEach(c => {
             topBody.innerHTML += `
             <tr>
@@ -1779,7 +1809,12 @@ async function loadInsights() {
         });
 
         const dueBody = document.getElementById("due-customers-body");
+        
         dueBody.innerHTML = "";
+        if(data.customersWithDue.length===0){
+            dueBody.innerHTML = `<tr><td colspan="2">No customers with due payments found</td></tr>`;
+            return;
+        }
         data.customersWithDue.forEach(c => {
             dueBody.innerHTML += `
                 <tr>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="modal-styles.css">
     <link rel="stylesheet" href="insights-styles.css">
+    <link rel="stylesheet" href="customer-dashboard.css">
 </head>
 
 <body>
@@ -72,20 +73,33 @@
     <div id="customer-dashboard" class="hidden">
         <div class="dashboard-header">
             <div>
-                <h2>👋 Welcome <span id="customer-name-display"></span>,</h2>
+                <h2>👋 Welcome <span id="customer-name-display"></span>!</h2>
             </div>
-            <button onclick="showCustomerProfile()">My Profile</button>
-            <button onclick="logoutCustomer()" class="logout-btn">Logout</button>
+            <div class="header-actions">
+                <button onclick="showCustomerProfile()">
+                    <span class="icon">👤</span> My Profile
+                </button>
+                <button onclick="logoutCustomer()" class="logout-btn">
+                    <span class="icon">🚪</span> Logout
+                </button>
+            </div>
         </div>
 
         <div class="balance-box">
-            <h2>💰 Balance Due: ₹<span id="customer-balance">0</span></h2>
-            <button onclick="showCustomerPaymentModal(currentCustomerBalance)" id="pay-now-btn">Pay 💳</button>
+            <h2>
+                <span class="icon">💰</span>
+                Balance Due: ₹<span id="customer-balance">0</span>
+            </h2>
+            <button onclick="showCustomerPaymentModal()" id="pay-now-btn">
+                <span class="icon">💳</span> Pay Now
+            </button>
         </div>
 
-
         <div class="table-container">
-            <h3>Your Orders</h3>
+            <h3>
+                <span class="icon">📦</span>
+                Your Orders
+            </h3>
             <table class="order-table">
                 <thead>
                     <tr>
@@ -97,13 +111,17 @@
                     </tr>
                 </thead>
                 <tbody id="customer-order-body">
-
                 </tbody>
             </table>
         </div>
+
         <div id="customer-orders-container"></div>
+        
         <div class="table-container">
-            <h3>Your Payments</h3>
+            <h3>
+                <span class="icon">💵</span>
+                Your Payments
+            </h3>
             <table class="payment-table">
                 <thead>
                     <tr>
@@ -114,11 +132,9 @@
                     </tr>
                 </thead>
                 <tbody id="customer-payment-body">
-
                 </tbody>
             </table>
         </div>
-
     </div>
 
 
@@ -213,7 +229,7 @@
                             <h2>Orders</h2>
                         </div>
                         <div class="form-body">
-                            <!-- Horizontal Filters -->
+                            <!-- Filters -->
                             <div class="filter-row">
                                 <div class="filter-item">
                                     <label for="filter-status">Status</label>
@@ -283,10 +299,9 @@
                                 <label for="customer-name">Full Name</label>
                                 <div class="input-wrapper">
                                     <span class="input-icon">👤</span>
-                                    <input type="text" id="customer-name" placeholder="Enter customer's full name"
-                                        autocomplete="name" required>
+                                    <input type="text" id="customer-name" placeholder="Enter customer's full name" pattern="[A-Za-z\s]+" autocomplete="name" required>
                                 </div>
-                                <!-- <span class="input-help">Enter customer's complete name as per records</span> -->
+                               
                             </div>
                             <div class="input-group">
                                 <label for="customer-phone">Phone Number</label>
@@ -295,7 +310,7 @@
                                     <input type="tel" id="customer-phone" placeholder="Enter 10-digit phone number"
                                         pattern="[0-9]{10}" maxlength="10" autocomplete="tel" required>
                                 </div>
-                                <!-- <span class="input-help">Enter a valid 10-digit mobile number</span> -->
+                                
                             </div>
                             <div class="form-actions">
                                 <button id="add-btn" class="primary-button" onclick="addCustomer()">
@@ -327,7 +342,7 @@
                                         <option value="">Select Customer</option>
                                     </select>
                                 </div>
-                                <!-- <span class="input-help">Select the customer placing the order</span> -->
+                                
                             </div>
 
                             <div class="input-group">
@@ -336,7 +351,7 @@
                                     <label class="service-option">
                                         <input type="radio" name="serviceType" value="REGULAR" checked>
                                         <span class="service-icon">👕</span>
-                                        <span class="service-label">Regular Wash</span>
+                                        <span class="service-label">Regular</span>
                                     </label>
                                     <label class="service-option">
                                         <input type="radio" name="serviceType" value="LAUNDRY">
@@ -353,7 +368,7 @@
                                     <input type="number" id="cloth-count" placeholder="Enter number of clothes" min="1"
                                         required>
                                 </div>
-                                <!-- <span class="input-help">Enter the total number of clothes</span> -->
+                                
                             </div>
 
                             <div class="form-actions">
@@ -390,7 +405,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="customers-table-body">
-                                        <!-- Rows will be dynamically inserted here -->
+                                        <!-- Rows will be dynamically inserted here by js -->
                                     </tbody>
                                 </table>
                             </div>
@@ -438,9 +453,11 @@
                                 <table id="customer-payments-table">
                                     <thead>
                                         <tr>
-                                            <th>Customer</th>
-                                            <th>Total Payments</th>
-                                            <th>Last Payment Date</th>
+                                            <th>Transaction ID</th>
+                                            <th>Customer Name</th>
+                                            <th>Amount</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -624,23 +641,35 @@
     <!-- Customer profile modal for password change -->
     <div id="customer-profile-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>Change Password</h3>
-            <div id="customer-profile-message" class="message"></div>
-            <span class="close" onclick="closeCustomerProfileModal()">&times;</span>
-            <div class="form-group">
-                <label for="old_password">Current Password</label>
-                <input type="text" id="old_password" placeholder="your current password">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <span class="close" onclick="closeCustomerProfileModal()">&times;</span>
             </div>
-            <div class="form-group">
-                <label for="new_password">New Password</label>
-                <input type="text" id="new_password" placeholder="enter new password">
-            </div>
+            <div class="modal-body">
+                <div id="customer-profile-message" class="message"></div>
+                <div class="form-group">
+                    <label for="old_password">Current Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="old_password" placeholder="Enter your current password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="new_password" placeholder="Enter new password">
+                    </div>
+                </div>
 
-            <div class="modal-actions">
-                <button onclick="submitPasswordChange()">Update Password</button>
+                <div class="modal-actions">
+                    <div class="main-actions">
+                        <button onclick="submitPasswordChange()" class="primary-button">Update Password</button>
+                        <button onclick="closeCustomerProfileModal()" class="secondary-button">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <div id="invoice-modal" class="modal hidden">

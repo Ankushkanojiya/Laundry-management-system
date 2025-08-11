@@ -47,9 +47,11 @@ public class PaymentService {
 
         if (request.getAmount()<=0){
             System.out.println(" Amount should be greater than zero");
+            throw new RuntimeException("Amount should be greater than zero");
         }
         if (request.getAmount() > account.getBalance()){
             System.out.println(" Bahut paise aa gaye hai Lala seth");
+            throw new RuntimeException("Amount cannot exceed the due balance");
         }
         // deduct the balance
         account.setBalance(account.getBalance()-request.getAmount());
@@ -166,6 +168,9 @@ public class PaymentService {
 
         accountRepo.save(account);
         transactionRepo.save(saveTransaction);
+        if (account.getBalance()==0){
+            orderService.completeAllOrders(account.getCustomer());
+        }
 
         pendingRepo.delete(pending);
 
