@@ -1744,6 +1744,7 @@ function showProfileMessage(message, type = "error") {
 
 function showInsights() {
     showSection('insights-section', 'Insights');
+    document.getElementById("insights-section").classList.remove("hidden");
     loadInsights();
 }
 

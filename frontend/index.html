@@ -6,62 +6,65 @@
     <title>Laundry Admin</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="modal-styles.css">
+    <link rel="stylesheet" href="insights-styles.css">
 </head>
 
 <body>
     <div id="auth-section">
         <div class="auth-container">
             <h1>Laundry Management System</h1>
-            
+
             <!-- Toggle Tabs -->
             <div class="tab-toggle">
                 <button onclick="showTab('admin')" id="tab-admin" class="active-tab">Admin</button>
                 <button onclick="showTab('customer')" id="tab-customer">Customer</button>
             </div>
 
-        <!-- Admin Login Form -->
-        <div id="admin-form" class="auth-form">
-            <h2>Admin Login</h2>
-            <div class="form-group">
-                <input type="text" id="username" placeholder="Username">
-            </div>
-            <div class="form-group">
-                <input type="password" id="password" placeholder="Password">
-            </div>
-            <button onclick="login()">Login</button>
-            <p id="login-message"></p>
-        </div>
-
-        <!-- Customer registration and login form -->
-        <div id="customer-form" class="auth-form hidden">
-            <div id="customer-login-section">
-                <h2>Customer Login</h2>
+            <!-- Admin Login Form -->
+            <div id="admin-form" class="auth-form">
+                <h2>Admin Login</h2>
                 <div class="form-group">
-                    <input type="text" id="customer-phone-login" placeholder="Phone Number">
+                    <input type="text" id="username" placeholder="Username">
                 </div>
                 <div class="form-group">
-                    <input type="password" id="customer-password-login" placeholder="Password">
+                    <input type="password" id="password" placeholder="Password">
                 </div>
-                <button onclick="loginCustomer()">Login</button>
-                <p class="switch-auth">
-                    New Customer? <button onclick="toggleAuthMode('register')" class="text-btn">Register here</button>
-                </p>
+                <button onclick="login()">Login</button>
+                <p id="login-message"></p>
             </div>
 
-            <div id="customer-register-section" class="hidden">
-                <h2>Register New Account</h2>
-                <div class="form-group">
-                    <input type="text" id="customer-phone-register" placeholder="Phone Number">
+            <!-- Customer registration and login form -->
+            <div id="customer-form" class="auth-form hidden">
+                <div id="customer-login-section">
+                    <h2>Customer Login</h2>
+                    <div class="form-group">
+                        <input type="text" id="customer-phone-login" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="customer-password-login" placeholder="Password">
+                    </div>
+                    <button onclick="loginCustomer()">Login</button>
+                    <p class="switch-auth">
+                        New Customer? <button onclick="toggleAuthMode('register')" class="text-btn">Register
+                            here</button>
+                    </p>
                 </div>
-                <div class="form-group">
-                    <input type="password" id="customer-password-register" placeholder="Password">
+
+                <div id="customer-register-section" class="hidden">
+                    <h2>Register New Account</h2>
+                    <div class="form-group">
+                        <input type="text" id="customer-phone-register" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="customer-password-register" placeholder="Password">
+                    </div>
+                    <button onclick="registerCustomer()">Register</button>
+                    <p class="switch-auth">
+                        Already have an account? <button onclick="toggleAuthMode('login')" class="text-btn">Login
+                            here</button>
+                    </p>
                 </div>
-                <button onclick="registerCustomer()">Register</button>
-                <p class="switch-auth">
-                    Already have an account? <button onclick="toggleAuthMode('login')" class="text-btn">Login here</button>
-                </p>
-            </div>
-            <p id="customer-auth-message"></p>
+                <p id="customer-auth-message"></p>
             </div>
         </div>
     </div>
@@ -268,150 +271,133 @@
                 </div>
             </div>
 
-        <!-- Add Customer Section -->
-        <div id="add-customer-section" class="hidden">
-            <div class="form-container">
-                <div class="form-card">
-                    <div class="form-header">
-                        <h2>Add New Customer</h2>
-                    </div>
-                    <div class="form-body">
-                        <div class="input-group">
-                            <label for="customer-name">Full Name</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">👤</span>
-                                <input 
-                                    type="text" 
-                                    id="customer-name" 
-                                    placeholder="Enter customer's full name"
-                                    autocomplete="name"
-                                    required
-                                >
+            <!-- Add Customer Section -->
+            <div id="add-customer-section" class="hidden">
+                <div class="form-container">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2>Add New Customer</h2>
+                        </div>
+                        <div class="form-body">
+                            <div class="input-group">
+                                <label for="customer-name">Full Name</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">👤</span>
+                                    <input type="text" id="customer-name" placeholder="Enter customer's full name"
+                                        autocomplete="name" required>
+                                </div>
+                                <!-- <span class="input-help">Enter customer's complete name as per records</span> -->
                             </div>
-                            <!-- <span class="input-help">Enter customer's complete name as per records</span> -->
-                        </div>
-                        <div class="input-group">
-                            <label for="customer-phone">Phone Number</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">📱</span>
-                                <input 
-                                    type="tel" 
-                                    id="customer-phone" 
-                                    placeholder="Enter 10-digit phone number"
-                                    pattern="[0-9]{10}"
-                                    maxlength="10"
-                                    autocomplete="tel"
-                                    required
-                                >
+                            <div class="input-group">
+                                <label for="customer-phone">Phone Number</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">📱</span>
+                                    <input type="tel" id="customer-phone" placeholder="Enter 10-digit phone number"
+                                        pattern="[0-9]{10}" maxlength="10" autocomplete="tel" required>
+                                </div>
+                                <!-- <span class="input-help">Enter a valid 10-digit mobile number</span> -->
                             </div>
-                            <!-- <span class="input-help">Enter a valid 10-digit mobile number</span> -->
-                        </div>
-                        <div class="form-actions">
-                            <button id="add-btn" class="primary-button" onclick="addCustomer()">
-                                Add Customer
-                            </button>
-                            <button class="secondary-button" onclick="resetForm()">
-                                Clear Form
-                            </button>
-                        </div>
-                        <div id="action-message" role="status" aria-live="polite"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Take Order Section -->
-        <div id="take-order-section" class="hidden">
-            <div class="form-container">
-                <div class="form-card">
-                    <div class="form-header">
-                        <h2>Take New Order</h2>
-                    </div>
-                    <div class="form-body">
-                        <div class="input-group">
-                            <label for="customer-select">Customer</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">👤</span>
-                                <select id="customer-select" required>
-                                    <option value="">Select Customer</option>
-                                </select>
+                            <div class="form-actions">
+                                <button id="add-btn" class="primary-button" onclick="addCustomer()">
+                                    Add Customer
+                                </button>
+                                <button class="secondary-button" onclick="resetForm()">
+                                    Clear Form
+                                </button>
                             </div>
-                            <!-- <span class="input-help">Select the customer placing the order</span> -->
-                        </div>
-
-                        <div class="input-group">
-                            <label>Service Type</label>
-                            <div class="service-options">
-                                <label class="service-option">
-                                    <input type="radio" name="serviceType" value="REGULAR" checked>
-                                    <span class="service-icon">👕</span>
-                                    <span class="service-label">Regular Wash</span>
-                                </label>
-                                <label class="service-option">
-                                    <input type="radio" name="serviceType" value="LAUNDRY">
-                                    <span class="service-icon">🧥</span>
-                                    <span class="service-label">Dry Cleaning</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="cloth-count">Number of Clothes</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">🔢</span>
-                                <input 
-                                    type="number" 
-                                    id="cloth-count" 
-                                    placeholder="Enter number of clothes"
-                                    min="1"
-                                    required
-                                >
-                            </div>
-                            <!-- <span class="input-help">Enter the total number of clothes</span> -->
-                        </div>
-
-                        <div class="form-actions">
-                            <button class="primary-button" onclick="submitOrder()">
-                                Create Order
-                            </button>
-                            <button class="secondary-button" onclick="resetOrderForm()">
-                                Clear Form
-                            </button>
-                        </div>
-                        <div id="order-message" role="status" aria-live="polite"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Manage Customers Section -->
-        <div id="manage-customers-section" class="hidden">
-            <div class="form-container">
-                <div class="form-card">
-                    <div class="form-header">
-                        <h2>Manage Customers</h2>
-                    </div>
-                    <div class="form-body">
-                        <!-- Customer List Table -->
-                        <div class="table-container">
-                            <table id="customers-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Phone</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="customers-table-body">
-                                    <!-- Rows will be dynamically inserted here -->
-                                </tbody>
-                            </table>
+                            <div id="action-message" role="status" aria-live="polite"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Take Order Section -->
+            <div id="take-order-section" class="hidden">
+                <div class="form-container">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2>Take New Order</h2>
+                        </div>
+                        <div class="form-body">
+                            <div class="input-group">
+                                <label for="customer-select">Customer</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">👤</span>
+                                    <select id="customer-select" required>
+                                        <option value="">Select Customer</option>
+                                    </select>
+                                </div>
+                                <!-- <span class="input-help">Select the customer placing the order</span> -->
+                            </div>
+
+                            <div class="input-group">
+                                <label>Service Type</label>
+                                <div class="service-options">
+                                    <label class="service-option">
+                                        <input type="radio" name="serviceType" value="REGULAR" checked>
+                                        <span class="service-icon">👕</span>
+                                        <span class="service-label">Regular Wash</span>
+                                    </label>
+                                    <label class="service-option">
+                                        <input type="radio" name="serviceType" value="LAUNDRY">
+                                        <span class="service-icon">🧥</span>
+                                        <span class="service-label">Dry Cleaning</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="cloth-count">Number of Clothes</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">🔢</span>
+                                    <input type="number" id="cloth-count" placeholder="Enter number of clothes" min="1"
+                                        required>
+                                </div>
+                                <!-- <span class="input-help">Enter the total number of clothes</span> -->
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="primary-button" onclick="submitOrder()">
+                                    Create Order
+                                </button>
+                                <button class="secondary-button" onclick="resetOrderForm()">
+                                    Clear Form
+                                </button>
+                            </div>
+                            <div id="order-message" role="status" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Customers Section -->
+            <div id="manage-customers-section" class="hidden">
+                <div class="form-container">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h2>Manage Customers</h2>
+                        </div>
+                        <div class="form-body">
+                            <!-- Customer List Table -->
+                            <div class="table-container">
+                                <table id="customers-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customers-table-body">
+                                        <!-- Rows will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Payments Section -->
             <div id="payments-section" class="hidden">
@@ -466,73 +452,84 @@
                 </div>
             </div>
 
-            <!-- Insights Section -->
+
+            <!-- show insights section -->
             <div id="insights-section" class="hidden">
-                <div class="form-container">
-                    <div class="form-card">
-                        <div class="form-header">
-                            <h2>Business Insights</h2>
-                        </div>
-                        <div class="form-body">
-                            <!-- Revenue Insights -->
-                            <div class="insights-card">
-                                <h3>Revenue Overview</h3>
-                                <div id="revenue-chart" class="chart-container"></div>
-                            </div>
-                            
-                            <!-- Order Insights -->
-                            <div class="insights-card">
-                                <h3>Order Statistics</h3>
-                                <div id="orders-chart" class="chart-container"></div>
-                            </div>
-                            
-                            <!-- Customer Insights -->
-                            <div class="insights-card">
-                                <h3>Customer Analytics</h3>
-                                <div id="customers-chart" class="chart-container"></div>
-                            </div>
-                        </div>
+                <h2>Business Insights</h2>
+                <div class="dashboard-cards">
+                    <div class=" card total-customer-card">
+                        <h3>Total Customers</h3>
+                        <p id="total-customers">0</p>
+                    </div>
+
+
+                    <div class=" card total-revenue-card">
+                        <h3>Revenue</h3>
+                        <p id="total-revenue">₹0.00</p>
                     </div>
                 </div>
+
+                <h3>Top Paying Customers</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Total Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-customers-body"></tbody>
+                </table>
+
+                <h3>Customers with Due</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="due-customers-body"></tbody>
+                </table>
             </div>
 
-        <!-- Edit Customer Modal -->
-        <div id="edit-customer-modal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close" onclick="closeEditCustomerModal()">&times;</span>
-                <h3>Edit Customer Details</h3>
-                <div id="edit-customer-form">
-                    <div class="input-group">
-                        <label for="edit-customer-name">Full Name</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">👤</span>
-                            <input type="text" id="edit-customer-name" placeholder="Full Name" required>
+
+            <!-- Edit Customer Modal -->
+            <div id="edit-customer-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close" onclick="closeEditCustomerModal()">&times;</span>
+                    <h3>Edit Customer Details</h3>
+                    <div id="edit-customer-form">
+                        <div class="input-group">
+                            <label for="edit-customer-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="edit-customer-name" placeholder="Full Name" required>
+                            </div>
                         </div>
+                        <div class="input-group">
+                            <label for="edit-customer-phone">Phone Number</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📱</span>
+                                <input type="text" id="edit-customer-phone" placeholder="Phone Number" required>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <div class="main-actions">
+                                <button onclick="updateCustomer()" class="primary-button">Save Changes</button>
+                                <button onclick="closeEditCustomerModal()" class="secondary-button">Cancel</button>
+                            </div>
+                            <div class="danger-zone">
+                                <hr class="divider">
+                                <p class="danger-text">Danger Zone</p>
+                                <button onclick="deleteCustomer(currentCustomerId)" class="danger-button">
+                                    🗑️ Delete Customer
+                                </button>
+                            </div>
+                        </div>
+                        <div id="edit-customer-message" class="message"></div>
                     </div>
-                    <div class="input-group">
-                        <label for="edit-customer-phone">Phone Number</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📱</span>
-                            <input type="text" id="edit-customer-phone" placeholder="Phone Number" required>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <div class="main-actions">
-                            <button onclick="updateCustomer()" class="primary-button">Save Changes</button>
-                            <button onclick="closeEditCustomerModal()" class="secondary-button">Cancel</button>
-                        </div>
-                        <div class="danger-zone">
-                            <hr class="divider">
-                            <p class="danger-text">Danger Zone</p>
-                            <button onclick="deleteCustomer(currentCustomerId)" class="danger-button">
-                                🗑️ Delete Customer
-                            </button>
-                        </div>
-                    </div>
-                    <div id="edit-customer-message" class="message"></div>
                 </div>
             </div>
-        </div>
         </main>
     </div>
 
