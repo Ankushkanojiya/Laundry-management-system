@@ -315,6 +315,10 @@ async function addCustomer() {
         showMessage('Please fill all fields', 'error');
         return;
     }
+    if (!/[A-Za-z]/.test(name)) {
+        showMessage('Name must contain letters', 'error');
+        return;
+    }
 
     if (!/^\d{10}$/.test(phone)) {
         showMessage('Phone must be 10 digits', 'error');
@@ -1686,6 +1690,7 @@ function logoutCustomer() {
         
         // Show auth section properly
         const authSection = document.getElementById("auth-section");
+        authSection.classList.remove("hidden");
         authSection.style.display = "flex";
         
         // Switch to customer tab and show login form
