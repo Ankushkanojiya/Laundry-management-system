@@ -1268,8 +1268,8 @@ function launchUpiIntent(amount) {
     const txnRef = "TXN" + Date.now(); 
 
     const upiLink = `upi://pay` +
-        `?pa=rupeshggupta951@oksbi` +  
-        `&pn=Rupesh` +                        
+        `?pa=9619723090@okbizaxis` +  
+        `&pn=Sanjay Power Laundry` +                        
         `&tr=${txnRef}` +                 
         `&txnId=${txnRef}` +               
         `&am=${amount}` +                 
@@ -1280,14 +1280,6 @@ function launchUpiIntent(amount) {
 }
 
 
-function generateUpiDeepLink(amount) {
-    const upiId = "9619723090@ybl";
-    const payeeName = "rupesh";
-    const currency = "INR";
-    const note = "Laundry Payment";
-
-    return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(note)}`;
-}
 
 async function sendPendingPayment(amount) {
     try {
@@ -1519,6 +1511,7 @@ async function loginCustomer() {
         localStorage.setItem("customerToken", result.token)
         localStorage.setItem("customerId", result.customerId);
         localStorage.setItem("customerName", result.customerName);
+        localStorage.setItem("customerPhone", phone); // Store the phone number used for login
 
 
         document.getElementById("auth-section").classList.add("hidden");
@@ -1670,7 +1663,8 @@ function logoutCustomer() {
         // Hide all sections that might be open
         const sectionsToHide = [
             "customer-dashboard",
-            "customer-profile-modal",
+            "customer-profile-sidebar",
+            "sidebar-overlay",
             "payment-modal",
             "payment-transaction-history",
             "customer-order-history"
@@ -1680,6 +1674,8 @@ function logoutCustomer() {
             const element = document.getElementById(id);
             if (element) {
                 element.classList.add('hidden');
+                // Also remove active class if it exists (for sidebar)
+                element.classList.remove('active');
             }
         });
 
@@ -1709,38 +1705,134 @@ function logoutCustomer() {
     }
 }
 
-function openPaymentModal() {
 
-    showPaymentModal();
-}
 
 function showCustomerProfile() {
-    const modal = document.getElementById("customer-profile-modal");
-    modal.classList.remove("hidden");
-    modal.classList.add("modal--active");  // Add this line to properly show the modal
+    const sidebar = document.getElementById("customer-profile-sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    
+    // First make sidebar visible but still off-screen
+    sidebar.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+    
+    // Force a reflow to ensure the visibility change is applied
+    sidebar.offsetHeight;
+    
+    // Then trigger the slide-in animation
+    requestAnimationFrame(() => {
+        sidebar.classList.add("active");
+    });
+    
+    // Load customer information
+    const customerName = localStorage.getItem("customerName");
+    const customerPhone = localStorage.getItem("customerPhone");
+    
+    // Display customer information with fallbacks
+    const nameElement = document.getElementById("profile-customer-name");
+    const phoneElement = document.getElementById("profile-customer-phone");
+    
+    if (nameElement) {
+        nameElement.textContent = customerName || "Not available";
+    }
+    if (phoneElement) {
+        phoneElement.textContent = customerPhone || "Not available";
+    }
+    
+    // Hide password change form initially
+    const passwordForm = document.getElementById("password-change-form");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+    
+    if (passwordForm) passwordForm.classList.add("hidden");
+    if (changePasswordBtn) changePasswordBtn.classList.remove("hidden");
     
     // Clear any previous messages and form values
-    document.getElementById("customer-profile-message").textContent = "";
-    document.getElementById("old_password").value = "";
-    document.getElementById("new_password").value = "";
+    const messageElement = document.getElementById("customer-profile-message");
+    if (messageElement) {
+        messageElement.textContent = "";
+    }
+    
+    const oldPasswordField = document.getElementById("old_password");
+    const newPasswordField = document.getElementById("new_password");
+    if (oldPasswordField) oldPasswordField.value = "";
+    if (newPasswordField) newPasswordField.value = "";
 }
 
-function closeCustomerProfileModal() {
-    document.getElementById("customer-profile-modal").classList.add("hidden");
+function closeCustomerProfileSidebar() {
+    const sidebar = document.getElementById("customer-profile-sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    
+    if (sidebar) {
+        // Start the slide-out animation
+        sidebar.classList.remove("active");
+        
+        // Hide overlay immediately
+        if (overlay) overlay.classList.add("hidden");
+        
+        // Wait for animation to complete before fully hiding
+        setTimeout(() => {
+            sidebar.classList.add("hidden");
+        }, 300); // Match the CSS transition duration
+    }
+    
+    // Reset sidebar state
+    const passwordForm = document.getElementById("password-change-form");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+    
+    if (passwordForm) passwordForm.classList.add("hidden");
+    if (changePasswordBtn) changePasswordBtn.classList.remove("hidden");
+    
+    // Clear form values
+    const oldPasswordField = document.getElementById("old_password");
+    const newPasswordField = document.getElementById("new_password");
+    if (oldPasswordField) oldPasswordField.value = "";
+    if (newPasswordField) newPasswordField.value = "";
+    
+    // Clear any messages
+    const messageElement = document.getElementById("customer-profile-message");
+    if (messageElement) {
+        messageElement.textContent = "";
+    }
 }
 
-const messageField = document.getElementById("customer-profile-message").textContent = "";
+function showPasswordChangeForm() {
+    const passwordForm = document.getElementById("password-change-form");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+    
+    if (passwordForm) passwordForm.classList.remove("hidden");
+    if (changePasswordBtn) changePasswordBtn.classList.add("hidden");
+}
+
+function cancelPasswordChange() {
+    const passwordForm = document.getElementById("password-change-form");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+    
+    if (passwordForm) passwordForm.classList.add("hidden");
+    if (changePasswordBtn) changePasswordBtn.classList.remove("hidden");
+    
+    // Clear form values
+    const oldPasswordField = document.getElementById("old_password");
+    const newPasswordField = document.getElementById("new_password");
+    if (oldPasswordField) oldPasswordField.value = "";
+    if (newPasswordField) newPasswordField.value = "";
+    
+    // Clear any messages
+    const messageElement = document.getElementById("customer-profile-message");
+    if (messageElement) {
+        messageElement.textContent = "";
+    }
+}
+
 async function submitPasswordChange() {
     const old_password = document.getElementById('old_password').value.trim();
     const new_password = document.getElementById("new_password").value.trim();
 
-    console.log("old", old_password);
-    console.log("mew", new_password);
-
-
-
     if (!old_password || !new_password) {
         showProfileMessage("Please fill both fields", "error");
+        return;
+    }
+
+    if (new_password.length < 6) {
+        showProfileMessage("New password must be at least 6 characters long", "error");
         return;
     }
 
@@ -1754,13 +1846,27 @@ async function submitPasswordChange() {
         const msg = await response.text();
         showProfileMessage(msg, response.ok ? "success" : "error");
 
-
         if (response.ok) {
-            setTimeout(closeCustomerProfileModal, 2500);
+            // Clear form and hide password change section
+            const oldPasswordField = document.getElementById("old_password");
+            const newPasswordField = document.getElementById("new_password");
+            const passwordForm = document.getElementById("password-change-form");
+            const changePasswordBtn = document.getElementById("change-password-btn");
+            
+            if (oldPasswordField) oldPasswordField.value = "";
+            if (newPasswordField) newPasswordField.value = "";
+            if (passwordForm) passwordForm.classList.add("hidden");
+            if (changePasswordBtn) changePasswordBtn.classList.remove("hidden");
+            
+            setTimeout(() => {
+                const messageElement = document.getElementById("customer-profile-message");
+                if (messageElement) {
+                    messageElement.textContent = "";
+                }
+            }, 3000);
         }
     } catch (error) {
         showProfileMessage("Something went wrong", "error");
-
     }
 }
 

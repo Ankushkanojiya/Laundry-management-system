@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -11,8 +12,8 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-
-    private final String SECRET_KEY="laundrymanagement_is_the_@top_1_no_one_can_BeatUS";
+    @Value("${jwt.secretkey}")
+    private String SECRET_KEY;
 
     public String generateToken(String phoneNumber){
         return Jwts.builder()

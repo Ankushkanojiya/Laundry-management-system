@@ -71,6 +71,70 @@
     </div>
 
     <div id="customer-dashboard" class="hidden">
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="closeCustomerProfileSidebar()"></div>
+        
+        <!-- Customer Profile Sidebar -->
+        <div id="customer-profile-sidebar" class="profile-sidebar hidden">
+            <div class="sidebar-header">
+                <h3>My Profile</h3>
+                <button onclick="closeCustomerProfileSidebar()" class="close-sidebar-btn">
+                    <span class="icon">✕</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Customer Information Section -->
+                <div class="profile-info-section">
+                    <h4><span class="icon">👤</span> Personal Information</h4>
+                    <div class="info-item">
+                        <label>Full Name</label>
+                        <div class="info-value">
+                            <span class="info-icon">👤</span>
+                            <span id="profile-customer-name">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone Number</label>
+                        <div class="info-value">
+                            <span class="info-icon">📱</span>
+                            <span id="profile-customer-phone">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="password-section">
+                    <h4><span class="icon">🔐</span> Security</h4>
+                    <button onclick="showPasswordChangeForm()" id="change-password-btn" class="change-password-btn">
+                        <span class="icon">🔑</span> Change Password
+                    </button>
+                    
+                    <div id="password-change-form" class="password-form hidden">
+                        <div id="customer-profile-message" class="message"></div>
+                        <div class="form-group">
+                            <label for="old_password">Current Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="old_password" placeholder="Enter current password">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_password">New Password</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🔑</span>
+                                <input type="password" id="new_password" placeholder="Enter new password">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button onclick="submitPasswordChange()" class="primary-btn">Update Password</button>
+                            <button onclick="cancelPasswordChange()" class="secondary-btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="dashboard-header">
             <div>
                 <h2>👋 Welcome <span id="customer-name-display"></span>!</h2>
@@ -634,40 +698,6 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Customer profile modal for password change -->
-    <div id="customer-profile-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Change Password</h3>
-                <span class="close" onclick="closeCustomerProfileModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="customer-profile-message" class="message"></div>
-                <div class="form-group">
-                    <label for="old_password">Current Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔒</span>
-                        <input type="password" id="old_password" placeholder="Enter your current password">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="new_password">New Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔑</span>
-                        <input type="password" id="new_password" placeholder="Enter new password">
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <div class="main-actions">
-                        <button onclick="submitPasswordChange()" class="primary-button">Update Password</button>
-                        <button onclick="closeCustomerProfileModal()" class="secondary-button">Cancel</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

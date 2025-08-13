@@ -4,6 +4,7 @@ import com.laundry.security.JwtCustomerFilter;
 import com.laundry.service.AdminUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -30,16 +32,16 @@ public class SecurityConfig {
     @Autowired
     private JwtCustomerFilter jwtCustomerFilter;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .cors(cors-> cors.configurationSource(request -> {
                     CorsConfiguration config=new CorsConfiguration();
-                        config.setAllowedOrigins(List.of(
-                                "http://localhost:5500","http://localhost:8080","http://192.168.0.106:5500","http://192.168.194.223:5500","http://localhost:*",
-                                "http://127.0.0.1:*",
-                                "http://192.168.*.*:*"));
+                        config.setAllowedOrigins(Arrays.asList(frontendUrl.split(",")));
                     config.setAllowedMethods(List.of("GET","POST","DELETE","PUT","PATCH"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
