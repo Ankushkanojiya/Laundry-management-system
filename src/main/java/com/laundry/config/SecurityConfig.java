@@ -1,5 +1,6 @@
 package com.laundry.config;
 
+import com.laundry.security.JwtAdminFilter;
 import com.laundry.security.JwtCustomerFilter;
 import com.laundry.service.AdminUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,9 @@ public class SecurityConfig {
     @Autowired
     private JwtCustomerFilter jwtCustomerFilter;
 
+    @Autowired
+    private JwtAdminFilter jwtAdminFilter;
+
     @Value("${frontend.url}")
     private String frontendUrl;
 
@@ -55,19 +59,19 @@ public class SecurityConfig {
                                 "/api/customer-auth/login",
                                 "/api/customer-auth/register",
                                 "/login",
-                                "/error"
+                                "/error",
+                                "/api/admin/auth/login"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/orders/customer/**",
                                 "/api/payments/**",
-                                "/api/customers/**",
                                 "/api/customers",
-                                "api/payments/customer",
-                                "api/payments/pending",
-                                "api/customer-auth/me/**"
+                                "/api/payments/customer",
+                                "/api/payments/pending",
+                                "/api/customer-auth/me/**"
                         ).authenticated()
                         .requestMatchers("/api/insights").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -77,34 +81,11 @@ public class SecurityConfig {
                         })
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(jwtAdminFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtCustomerFilter, UsernamePasswordAuthenticationFilter.class)
-
-                .formLogin(form -> form
-                        .loginProcessingUrl("/login")
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"message\":\"Login successful\"}");
-                        })
-                        .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":\"Invalid credentials\"}");
-                        })
-                )
-
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessHandler((request, response, auth) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.getWriter().write("{\"message\": \"Logout successful\"}");
-                        })
-                );
-
-
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -114,12 +95,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public AuthenticationManager authManager(HttpSecurity http, AdminUserDetailsService adminUserDetailsService) throws Exception{
-//        AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authBuilder
-//                .userDetailsService(adminUserDetailsService)
-//                .passwordEncoder(passwordEncoder());
-//        return authBuilder.build();
-//    }
+
 }
