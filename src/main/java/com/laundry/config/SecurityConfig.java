@@ -60,7 +60,8 @@ public class SecurityConfig {
                                 "/api/customer-auth/register",
                                 "/login",
                                 "/error",
-                                "/api/admin/auth/login"
+                                "/api/admin/auth/login",
+                                "/health"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/orders/customer/**",
