@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class InsightResponse {
     private Long totalCustomers;
+    private Long totalOrders;
     private double totalRevenue;
     private List<TopCustomers> topCustomers;
     private List<DueCustomers> customersWithDue;

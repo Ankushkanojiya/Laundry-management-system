@@ -8,6 +8,7 @@ import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.CustomerAccountRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.repo.OrderRepository;
 import com.laundry.repo.PaymentTransactionHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,12 @@ public class InsightService {
     private final CustomerRepository customerRepo;
     private final PaymentTransactionHistory paymentRepo;
     private final CustomerAccountRepository accountRepo;
+    private final OrderRepository orderRepo;
 
     public InsightResponse getInsights(){
         long totalCustomer=customerRepo.count();
+
+        long totalOrders=orderRepo.count();
 
         double totalRevenue=0.0;
 
@@ -78,6 +82,6 @@ public class InsightService {
             }
         }
 
-        return new InsightResponse(totalCustomer,totalRevenue,topCustomers,customersWithDue);
+        return new InsightResponse(totalCustomer,totalOrders,totalRevenue,topCustomers,customersWithDue);
     }
 }
