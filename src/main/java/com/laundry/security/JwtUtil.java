@@ -15,11 +15,13 @@ public class JwtUtil {
     @Value("${jwt.secretkey}")
     private String SECRET_KEY;
 
+    public static final long JWT_TOKEN_VALIDITY=24 * 60 * 60;
+
     public String generateToken(String phoneNumber){
         return Jwts.builder()
                 .setSubject(phoneNumber)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 10000000))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }

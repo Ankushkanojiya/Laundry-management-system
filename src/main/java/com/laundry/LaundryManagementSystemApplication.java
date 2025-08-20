@@ -26,10 +26,14 @@ public class LaundryManagementSystemApplication {
 	@Bean
 	CommandLineRunner initAdmin(AdminRepository adminRepo, BCryptPasswordEncoder encoder) {
 		return args -> {
-			Admin admin = new Admin();
-			admin.setUsername("admin");
-			admin.setPassword(encoder.encode("admin123"));
-			adminRepo.save(admin);
+			if(adminRepo.count() < 1) {
+				Admin admin = new Admin();
+				admin.setUsername("admin");
+				admin.setPassword(encoder.encode("admin123"));
+				adminRepo.save(admin);
+			}else{
+				System.out.println("Admin already exists");
+			}
 		};
 	}
 
