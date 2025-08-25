@@ -56,9 +56,9 @@ public class CustomerAuthService {
             throw new RuntimeException("Invalid phone number and password");
         }
         String token=jwtUtil.generateToken(login.getPhoneNumber());
+        System.out.println("The customer id is "+ customer.getId());
 
-        return new JwtResponse(token, login.getId(), customer.getName());
-
+        return new JwtResponse(token, customer.getId(), customer.getName());
 
     }
 

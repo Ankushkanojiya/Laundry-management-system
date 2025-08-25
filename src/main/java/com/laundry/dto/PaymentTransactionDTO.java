@@ -15,13 +15,13 @@ public class PaymentTransactionDTO {
     private String customerName;
     private double amount;
     private LocalDateTime timestamp;
-    private String status;
+
 
     public PaymentTransactionDTO(PaymentTransactions transaction) {
         this.transactionId = transaction.getTransactionId();
         this.amount = transaction.getAmount();
         this.timestamp = transaction.getTimestamp();
-        this.status = transaction.getStatus() != null ? transaction.getStatus().name() : "PENDING";
+
 
         if (transaction.getAccount() != null &&
                 transaction.getAccount().getCustomer() != null) {
@@ -34,7 +34,8 @@ public class PaymentTransactionDTO {
         this.customerName = pending.getAccount().getCustomer().getName();
         this.amount = pending.getAmount();
         this.timestamp = pending.getTimestamp();
-        this.status = "PENDING";
+
+
     }
 
 }

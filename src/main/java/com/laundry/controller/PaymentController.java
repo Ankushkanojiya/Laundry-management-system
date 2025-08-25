@@ -3,6 +3,7 @@ package com.laundry.controller;
 import com.laundry.dto.PaymentRequest;
 import com.laundry.dto.PaymentSummary;
 import com.laundry.dto.PaymentTransactionDTO;
+import com.laundry.dto.PendingPaymentDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
@@ -96,4 +97,15 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PatchMapping("/{transactionId}/reject")
+    public ResponseEntity<?> rejectPendingPayments(@PathVariable Long transactionId){
+        try{
+            PendingPaymentDTO rejectPayment=paymentService.rejectPendingCustomerPayment(transactionId);
+            return ResponseEntity.ok(rejectPayment);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

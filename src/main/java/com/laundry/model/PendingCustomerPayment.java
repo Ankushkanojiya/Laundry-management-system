@@ -23,4 +23,11 @@ public class PendingCustomerPayment {
     private double amount;
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus customerPaymentStatus;
+
+    public enum PaymentStatus{
+        PENDING,CONFIRMED,REJECTED;
+    }
+
 }

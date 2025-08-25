@@ -94,10 +94,11 @@ public class CustomerService {
         Customer customer=customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
         System.out.println("Bring it on");
 
+
         orderRepo.deleteByCustomer(customer);
         System.out.println("Deleted the orders");
         accountRepo.deleteByCustomer(customer);
-        System.out.println("Delete the account");
+        System.out.println("Deleted the account");
         customerRepo.deleteById(id);
         System.out.println("finally customer deleted");
     }

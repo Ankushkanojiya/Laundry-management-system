@@ -3,6 +3,7 @@ package com.laundry.service;
 import com.laundry.dto.PaymentRequest;
 import com.laundry.dto.PaymentSummary;
 import com.laundry.dto.PaymentTransactionDTO;
+import com.laundry.dto.PendingPaymentDTO;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
@@ -72,7 +73,7 @@ public class PaymentService {
         transactions.setAccount(account);
         transactions.setAmount(request.getAmount());
         transactions.setTimestamp(LocalDateTime.now());
-        transactions.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
+//        transactions.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
         PaymentTransactions savedTransaction = transactionRepo.save(transactions);
 
         try {
@@ -129,6 +130,7 @@ public class PaymentService {
                 .account(account)
                 .amount(request.getAmount())
                 .timestamp(LocalDateTime.now())
+                .customerPaymentStatus(PendingCustomerPayment.PaymentStatus.PENDING)
                 .build();
         pending=pendingRepo.save(pending);
         return new PaymentTransactionDTO(pending);
@@ -138,6 +140,8 @@ public class PaymentService {
 
         PendingCustomerPayment pending=pendingRepo.findById(transactionId)
                 .orElseThrow(()->new RuntimeException("Payment Details not found"));
+
+        pending.setCustomerPaymentStatus(PendingCustomerPayment.PaymentStatus.CONFIRMED);
 
 
         CustomerAccount account=pending.getAccount();
@@ -149,13 +153,13 @@ public class PaymentService {
 
         account.setBalance(currentBalance-payAmount);
 
-        PaymentTransactions condfirmPayment=new PaymentTransactions();
-        condfirmPayment.setAccount(pending.getAccount());
-        condfirmPayment.setAmount(pending.getAmount());
-        condfirmPayment.setTimestamp(pending.getTimestamp());
-        condfirmPayment.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
+        PaymentTransactions confirmPayment=new PaymentTransactions();
+        confirmPayment.setAccount(pending.getAccount());
+        confirmPayment.setAmount(pending.getAmount());
+        confirmPayment.setTimestamp(pending.getTimestamp());
 
-        PaymentTransactions saveTransaction=transactionRepo.save(condfirmPayment);
+
+        PaymentTransactions saveTransaction=transactionRepo.save(confirmPayment);
 
         //Generate the receipt
 
@@ -177,6 +181,20 @@ public class PaymentService {
         return new PaymentTransactionDTO(saveTransaction);
     }
 
+    public PendingPaymentDTO rejectPendingCustomerPayment(Long transactionId){
+        PendingCustomerPayment pending = pendingRepo.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Payment ID not found"));
+
+        if (pending.getCustomerPaymentStatus() != PendingCustomerPayment.PaymentStatus.PENDING){
+            throw new RuntimeException("Only pending payments can be rejected");
+        }
+        pending.setCustomerPaymentStatus(PendingCustomerPayment.PaymentStatus.REJECTED);
+        pendingRepo.delete(pending);
+
+        return new PendingPaymentDTO(pending);
+    }
+
+
     public List<PaymentTransactionDTO> getAllPendingPayments() {
         List<PendingCustomerPayment> pendingPayments = pendingRepo.findAll();
         List<PaymentTransactionDTO> pendingList = new ArrayList<>();
@@ -186,4 +204,5 @@ public class PaymentService {
         }
         return pendingList;
     }
+
 }
