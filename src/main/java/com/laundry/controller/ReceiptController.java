@@ -25,6 +25,7 @@ public class ReceiptController {
 
     @GetMapping("/{transactionId}/download")
     public ResponseEntity<Resource> downloadReceipt(@PathVariable Long transactionId, HttpServletRequest request) {
+        System.out.println("inside the controller");
         PaymentTransactions transaction = paymentTransactionsHistory.findById(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
@@ -37,7 +38,9 @@ public class ReceiptController {
 
         Resource resource = new FileSystemResource(pdfFile);
 
+
         String contentType = "application/pdf";
+
         String fileName = pdfFile.getName();
 
         return ResponseEntity.ok()
