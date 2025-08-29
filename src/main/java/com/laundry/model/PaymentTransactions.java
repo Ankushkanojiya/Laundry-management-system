@@ -21,8 +21,7 @@ public class PaymentTransactions {
     private CustomerAccount account;
     private Double amount;
     private LocalDateTime timestamp;
-    @Column(name = "pdf_path")
-    private String pdfPath;
+
 
 
 }

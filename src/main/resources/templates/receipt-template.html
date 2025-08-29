@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Payment Receipt</title>
+    <style>
+
+        @page {
+            size: 300pt 250pt;
+            margin: 0;
+        }
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .receipt-box { max-width: 300px; margin: auto; padding: 20px; border: 1px solid #eee; font-size: 14px; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .details p { margin: 5px 0; }
+        .total { font-weight: bold; margin-top: 15px; text-align: left; }
+    </style>
+</head>
+<body>
+<div class="receipt-box">
+    <div class="header">
+        <h2>Payment Receipt</h2>
+        <p>Laundry Management System</p>
+    </div>
+    <div class="details">
+        <p><strong>Transaction ID:</strong> <span th:text="${data.transactionId}"></span></p>
+        <p><strong>Customer:</strong> <span th:text="${data.customerName}"></span></p>
+        <p><strong>Date:</strong> <span th:text="${#temporals.format(data.paymentDate, 'dd-MMM-yyyy HH:mm')}"></span></p>
+    </div>
+    <hr/>
+    <div class="total">
+        <p>Amount Paid: ₹<span th:text="${#numbers.formatDecimal(data.amount, 1, 'COMMA', 2, 'POINT')}"></span></p>
+    </div>
+</div>
+</body>
+</html>

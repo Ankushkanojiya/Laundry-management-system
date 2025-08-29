@@ -13,7 +13,6 @@ import com.laundry.repo.CustomerRepository;
 import com.laundry.repo.PaymentTransactionHistory;
 import com.laundry.repo.PendingCustomerPaymentRepository;
 import com.laundry.security.JwtUtil;
-import com.laundry.util.ReceiptGenerator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +31,19 @@ public class PaymentService {
     private final OrderService orderService;
     private final PaymentTransactionHistory transactionRepo;
     private final PendingCustomerPaymentRepository pendingRepo;
+    private final ReceiptGeneratorPdf receiptGeneratorPdf;
     @Autowired
     private JwtUtil jwtUtil;
 
     public List<PaymentSummary> getPaymentSummary(){
         return accountRepo.findCustomersWithBalance();
+    }
+
+    public List<PaymentTransactionDTO> getPaymentHistory(Long customerId) {
+        return transactionRepo.findByAccount_CustomerId(customerId)
+                .stream()
+                .map(PaymentTransactionDTO::new)
+                .toList();
     }
 
     @Transactional
@@ -73,24 +80,11 @@ public class PaymentService {
         transactions.setAccount(account);
         transactions.setAmount(request.getAmount());
         transactions.setTimestamp(LocalDateTime.now());
-//        transactions.setStatus(PaymentTransactions.PaymentStatus.CONFIRMED);
+
         PaymentTransactions savedTransaction = transactionRepo.save(transactions);
 
-        try {
-            String path= ReceiptGenerator.generateReceipt(savedTransaction);
-            savedTransaction.setPdfPath(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         return new PaymentTransactionDTO(savedTransaction);
 
-    }
-
-    public List<PaymentTransactionDTO> getPaymentHistory(Long customerId) {
-        return transactionRepo.findByAccount_CustomerId(customerId)
-                .stream()
-                .map(PaymentTransactionDTO::new)
-                .toList();
     }
 
 //    @Transactional
@@ -163,12 +157,12 @@ public class PaymentService {
 
         //Generate the receipt
 
-        try{
-            String pdfPath=ReceiptGenerator.generateReceipt(saveTransaction);
-            saveTransaction.setPdfPath(pdfPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to generate receipt");
-        }
+//        try {
+//            byte[] path=receiptGeneratorPdf.generateReceiptPdf(saveTransaction.getTransactionId());
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         accountRepo.save(account);
         transactionRepo.save(saveTransaction);

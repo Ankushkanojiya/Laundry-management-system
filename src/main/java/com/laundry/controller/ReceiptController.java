@@ -2,6 +2,7 @@ package com.laundry.controller;
 
 import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.PaymentTransactionHistory;
+import com.laundry.service.ReceiptGeneratorPdf;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -21,31 +22,21 @@ import java.io.File;
 @RestController
 public class ReceiptController {
 
-    private final PaymentTransactionHistory paymentTransactionsHistory;
+    private final ReceiptGeneratorPdf generatePdf;
 
     @GetMapping("/{transactionId}/download")
-    public ResponseEntity<Resource> downloadReceipt(@PathVariable Long transactionId, HttpServletRequest request) {
-        System.out.println("inside the controller");
-        PaymentTransactions transaction = paymentTransactionsHistory.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long transactionId) {
+        try{
+            byte[] pdf= generatePdf.generateReceiptPdf(transactionId);
+            HttpHeaders headers=new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            String fileName="receipt-"+transactionId+".pdf";
+            headers.setContentDispositionFormData("attachment",fileName);
 
-        String pdfPath = transaction.getPdfPath();
-        File pdfFile = new File(pdfPath);
-
-        if (!pdfFile.exists()) {
-            throw new RuntimeException("Receipt not generated yet for this transaction");
+            return ResponseEntity.ok().headers(headers).body(pdf);
+        }catch (Exception e){
+            System.out.println("Failed to generate pdf in controller");
+            return ResponseEntity.internalServerError().build();
         }
-
-        Resource resource = new FileSystemResource(pdfFile);
-
-
-        String contentType = "application/pdf";
-
-        String fileName = pdfFile.getName();
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                .body(resource);
     }
 }
