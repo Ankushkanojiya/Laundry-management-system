@@ -4,6 +4,8 @@ package com.laundry.service;
 import com.laundry.dto.OrderRequest;
 import com.laundry.dto.OrderResponse;
 import com.laundry.dto.PaymentSummary;
+import com.laundry.exception.CustomerNotFoundException;
+import com.laundry.exception.OrderNotFoundException;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.Order;
@@ -35,7 +37,7 @@ public class OrderService {
 
     public OrderResponse createOrder(OrderRequest request){
         Customer customer = customerRepo.findById(request.getCustomerId())
-                .orElseThrow(()-> new RuntimeException(" no customer found"));
+                .orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
 
         double totalAmount = calculateTotal(
                 request.getTotalClothes(),
@@ -47,7 +49,7 @@ public class OrderService {
         };
 
 
-        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new RuntimeException(" no customer found"));
+        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
         account.setBalance(account.getBalance() + totalAmount);
         accountRepo.save(account);
 
@@ -74,7 +76,7 @@ public class OrderService {
 
     public  OrderResponse updateStatus(Long orderId, String newStatus){
         Order order= orderRepo.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order Id is not found"));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         try {
             Order.OrderStatus status= Order.OrderStatus.valueOf(newStatus);

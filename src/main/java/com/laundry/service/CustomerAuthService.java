@@ -1,6 +1,7 @@
 package com.laundry.service;
 
 import com.laundry.dto.*;
+import com.laundry.exception.*;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerLogin;
 import com.laundry.repo.CustomerLoginRepository;
@@ -29,7 +30,7 @@ public class CustomerAuthService {
         }
 
         if (loginRepo.existsByPhoneNumber(phone)){
-            throw new RuntimeException("Already register, please Login");
+            throw new PhoneNumberAlreadyExistException(phone);
         }
 
         Customer customer=customerRepo.findAll()
@@ -50,10 +51,10 @@ public class CustomerAuthService {
     public JwtResponse login(CustomerLoginRequest request){
         Customer customer=customerRepo.findByPhoneNumber(request.getPhoneNumber()).orElseThrow(()-> new RuntimeException("Invalid phone number"));
 
-        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new RuntimeException("No account found"));
+        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new CustomerLoginNotFoundException(customer.getId()));
 
         if (!passwordEncoder.matches(request.getPassword(), login.getPassword())){
-            throw new RuntimeException("Invalid phone number and password");
+            throw new InvalidPhoneAndPassword();
         }
         String token=jwtUtil.generateToken(login.getPhoneNumber());
         System.out.println("The customer id is "+ customer.getId());
@@ -65,7 +66,7 @@ public class CustomerAuthService {
     public String changePassword(PasswordChangeRequest request, String authHeader) {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            throw new RuntimeException("Missing token");
+            throw new MissingTokenException();
         }
 
         String token=authHeader.substring(7);
@@ -76,7 +77,7 @@ public class CustomerAuthService {
         CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new RuntimeException("Customer Account is not found"));
 
         if (!passwordEncoder.matches(request.getOldPassword(), login.getPassword())){
-            throw new RuntimeException("Incorrect current password");
+            throw new IncorrectCurrentPasswordException();
         }
         login.setPassword(passwordEncoder.encode(request.getNewPassword()));
         loginRepo.save(login);

@@ -4,6 +4,10 @@ import com.laundry.dto.PaymentRequest;
 import com.laundry.dto.PaymentSummary;
 import com.laundry.dto.PaymentTransactionDTO;
 import com.laundry.dto.PendingPaymentDTO;
+import com.laundry.exception.CustomerNotFoundException;
+import com.laundry.exception.InvalidPaymentAmountException;
+import com.laundry.exception.PaymentDetailsNotFound;
+import com.laundry.exception.PaymentExceedsBalanceException;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
@@ -49,18 +53,14 @@ public class PaymentService {
     @Transactional
     public PaymentTransactionDTO recordPayment(PaymentRequest request){
         // validate customer exists or not
-        Customer customer=customerRepo.findById(request.getCustomerId()).orElseThrow(()-> new RuntimeException("Customer not found"));
+        Customer customer=customerRepo.findById(request.getCustomerId()).orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
         // check is there account
-        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new RuntimeException("Account is not found"));
+        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
 
-        if (request.getAmount()<=0){
-            System.out.println(" Amount should be greater than zero");
-            throw new RuntimeException("Amount should be greater than zero");
-        }
-        if (request.getAmount() > account.getBalance()){
-            System.out.println(" Bahut paise aa gaye hai Lala seth");
-            throw new RuntimeException("Amount cannot exceed the due balance");
-        }
+        if (request.getAmount()<=0) throw new InvalidPaymentAmountException();
+
+        if (request.getAmount() > account.getBalance()) throw new PaymentExceedsBalanceException();
+
         // deduct the balance
         account.setBalance(account.getBalance()-request.getAmount());
         System.out.println(account.getBalance());
@@ -116,9 +116,9 @@ public class PaymentService {
         String phone=jwtUtil.extractPhone(token);
 
         Customer customer = customerRepo.findByPhoneNumber(phone)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(request.getCustomerId()));
 
-        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new RuntimeException("Account is not found"));
+        CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
 
         PendingCustomerPayment pending = PendingCustomerPayment.builder()
                 .account(account)
@@ -133,7 +133,7 @@ public class PaymentService {
     public PaymentTransactionDTO verifyAndConfirmPendingPayments(Long transactionId) {
 
         PendingCustomerPayment pending=pendingRepo.findById(transactionId)
-                .orElseThrow(()->new RuntimeException("Payment Details not found"));
+                .orElseThrow(()->new PaymentDetailsNotFound(transactionId));
 
         pending.setCustomerPaymentStatus(PendingCustomerPayment.PaymentStatus.CONFIRMED);
 
@@ -155,14 +155,7 @@ public class PaymentService {
 
         PaymentTransactions saveTransaction=transactionRepo.save(confirmPayment);
 
-        //Generate the receipt
 
-//        try {
-//            byte[] path=receiptGeneratorPdf.generateReceiptPdf(saveTransaction.getTransactionId());
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
 
         accountRepo.save(account);
         transactionRepo.save(saveTransaction);
@@ -177,7 +170,7 @@ public class PaymentService {
 
     public PendingPaymentDTO rejectPendingCustomerPayment(Long transactionId){
         PendingCustomerPayment pending = pendingRepo.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Payment ID not found"));
+                .orElseThrow(() -> new PaymentDetailsNotFound(transactionId));
 
         if (pending.getCustomerPaymentStatus() != PendingCustomerPayment.PaymentStatus.PENDING){
             throw new RuntimeException("Only pending payments can be rejected");

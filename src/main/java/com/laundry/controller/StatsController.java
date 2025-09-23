@@ -3,6 +3,7 @@ package com.laundry.controller;
 
 import com.laundry.model.Order;
 import com.laundry.repo.OrderRepository;
+import com.laundry.repo.PaymentTransactionHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,13 @@ public class StatsController {
 
     @Autowired
     private  OrderRepository orderRepo;
+    @Autowired
+    private PaymentTransactionHistory transactionRepo;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getStats(){
         long pendingOrders= orderRepo.countByStatus(Order.OrderStatus.PENDING);
-        double revenueToday=orderRepo.sumOfRevenueToday(LocalDate.now());
+        double revenueToday=transactionRepo.sumOfRevenueToday(LocalDate.now());
         double businessRevenueToday=orderRepo.sumOfBusinessRevenueToday(LocalDate.now());
 
         return ResponseEntity.ok(Map.of(

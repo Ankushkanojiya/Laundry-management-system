@@ -1,6 +1,7 @@
 package com.laundry.service;
 
 import com.laundry.dto.ReceiptDataDTO;
+import com.laundry.exception.PaymentTransactionIdNotFound;
 import com.laundry.model.PaymentTransactions;
 import com.laundry.repo.PaymentTransactionHistory;
 import com.lowagie.text.DocumentException;
@@ -21,7 +22,7 @@ public class ReceiptGeneratorPdf {
 
     public byte[] generateReceiptPdf(Long transactionId) throws DocumentException{
         PaymentTransactions transaction=transactionRepo.findById(transactionId)
-                .orElseThrow(()-> new RuntimeException("Transaction ID is not found"));
+                .orElseThrow(()-> new PaymentTransactionIdNotFound(transactionId));
 
         ReceiptDataDTO receiptData= ReceiptDataDTO.builder()
                 .transactionId(transaction.getTransactionId())
