@@ -17,7 +17,7 @@ public interface CustomerAccountRepository extends JpaRepository<CustomerAccount
 
     @Query("SELECT NEW com.laundry.dto.PaymentSummary(" +
             "c.id, c.name, " +
-            "a.balance) " +  // Directly use account balance
+            "a.balance) " +
             "FROM CustomerAccount a " +
             "JOIN a.customer c " +
             "WHERE a.balance > 0")  // Only show customers with balance due

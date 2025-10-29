@@ -15,8 +15,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @SpringBootApplication
-@EnableJpaRepositories("com.laundry.repo") // Add if missing
-@EntityScan("com.laundry.model") // Add if missing
+@EnableJpaRepositories("com.laundry.repo")
+@EntityScan("com.laundry.model")
 public class LaundryManagementSystemApplication {
 
 	public static void main(String[] args) {

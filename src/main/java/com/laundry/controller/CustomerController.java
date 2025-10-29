@@ -20,7 +20,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<CustomerResponse> addCustomer(@Valid @RequestBody CustomerRequest request) {
-        System.out.println("CustomerService instance: " + customerService); // Debug line
+        System.out.println("CustomerService instance: " + customerService); // Debug line As I am not using slf4j
         CustomerResponse response = customerService.addCustomer(request);
         return ResponseEntity.ok(response);
     }
