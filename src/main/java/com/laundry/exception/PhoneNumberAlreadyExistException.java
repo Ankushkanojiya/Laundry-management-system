@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 public class PhoneNumberAlreadyExistException extends BusinessException{
 
     public PhoneNumberAlreadyExistException(String phoneNumber){
-        super("Phone Number"+phoneNumber+" already exist",HttpStatus.CONFLICT);
+        super("Customer with Phone Number: "+phoneNumber+" already exist",HttpStatus.CONFLICT);
     }
 }
