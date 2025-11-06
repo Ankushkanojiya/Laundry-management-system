@@ -16,6 +16,7 @@ public class CustomerResponse {
     private  Long id;
     private String name;
     private String phoneNumber;
+    private String email;
     private LocalDate registrationDate;
 
 }

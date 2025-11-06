@@ -2,6 +2,7 @@ package com.laundry.controller;
 
 import com.laundry.dto.*;
 import com.laundry.service.CustomerAuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class CustomerAuthController {
     private final CustomerAuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CustomerRegisterRequest request){
+    public ResponseEntity<String> register( @Valid @RequestBody CustomerRegisterRequest request){
         String msg=authService.register(request);
         return ResponseEntity.ok(msg);
     }

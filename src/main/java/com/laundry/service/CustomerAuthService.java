@@ -24,20 +24,21 @@ public class CustomerAuthService {
 
     public String register(CustomerRegisterRequest request){
         String phone=request.getPhoneNumber();
+        String email=request.getEmail();
 
-        if (!customerRepo.existsByPhoneNumber(phone)){
-            throw new RuntimeException("Please ask your admin to register your number");
-        }
+        Customer customer=customerRepo.findByPhoneNumber(phone)
+                .orElseThrow(() ->new RuntimeException("Please ask your admin to register your number"));
 
         if (loginRepo.existsByPhoneNumber(phone)){
             throw new PhoneNumberAlreadyExistException(phone);
         }
 
-        Customer customer=customerRepo.findAll()
-                .stream()
-                .filter(c -> c.getPhoneNumber().equals(phone))
-                .findFirst()
-                .orElseThrow(()-> new RuntimeException("Customer not found"));
+        if (customerRepo.existsByEmail(email)){
+            throw new RuntimeException("Email already registered");
+        }
+
+        customer.setEmail(email);
+        customerRepo.save(customer);
 
         CustomerLogin customerLogin=new CustomerLogin();
         customerLogin.setPhoneNumber(phone);

@@ -23,6 +23,9 @@ public class Customer {
     @Column(nullable = false, unique = true)
     private  String phoneNumber;
 
+    @Column(unique = true)
+    private String email;
+
     private LocalDate registrationDate = LocalDate.now();
 
     @ToString.Exclude
