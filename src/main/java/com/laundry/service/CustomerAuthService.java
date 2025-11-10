@@ -4,15 +4,21 @@ import com.laundry.dto.*;
 import com.laundry.exception.*;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerLogin;
+import com.laundry.model.Otp;
 import com.laundry.repo.CustomerLoginRepository;
 import com.laundry.repo.CustomerRepository;
+import com.laundry.repo.OtpRepository;
 import com.laundry.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -21,6 +27,9 @@ public class CustomerAuthService {
     private final CustomerRepository customerRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final SecureRandom random=new SecureRandom();
+    private final OtpRepository otpRepo;
+    private final MailService mail;
 
     public String register(CustomerRegisterRequest request){
         String phone=request.getPhoneNumber();
@@ -84,5 +93,33 @@ public class CustomerAuthService {
         loginRepo.save(login);
 
         return "Successfully change password";
+    }
+
+    public Map<String, String> sendOtpToEmail(ForgotPasswordRequest request) {
+         String email=request.getEmail();
+         Customer customer=customerRepo.findByEmail(email);
+
+         if(customer == null){
+             throw new CustomerNotFoundException(0L);
+         }
+
+         String customerId=String.valueOf(customer.getId());
+         Otp otp=generateOtp(customerId);
+
+         otpRepo.save(otp);
+
+         mail.sendMail(email,"Verification OTP - Laundry Management System",otp.getOtpCode());
+         return Map.of("success", "OTP has been sent to your Email");
+    }
+    private Otp generateOtp(String customerId){
+
+        int otpDigit=100000+ random.nextInt(900000);
+        String otpCode=String.valueOf(otpDigit);
+        Otp otp=new Otp();
+        otp.setId(UUID.randomUUID().toString());
+        otp.setCustomerId(customerId);
+        otp.setOtpCode(otpCode);
+        otp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        return otp;
     }
 }
