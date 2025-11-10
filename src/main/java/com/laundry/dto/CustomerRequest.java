@@ -19,4 +19,6 @@ public class CustomerRequest {
     @Pattern(regexp = "^\\d{10}$",message = "The number should be 10 digits")
     private String phoneNumber;
 
+    private String email;
+
 }

@@ -2,8 +2,8 @@ package com.laundry.controller;
 
 import com.laundry.dto.*;
 import com.laundry.service.CustomerAuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ public class CustomerAuthController {
     private final CustomerAuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CustomerRegisterRequest request){
+    public ResponseEntity<String> register( @Valid @RequestBody CustomerRegisterRequest request){
         String msg=authService.register(request);
         return ResponseEntity.ok(msg);
     }
@@ -32,4 +32,9 @@ public class CustomerAuthController {
         return ResponseEntity.ok(authService.changePassword(request,authHeader));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String,String>> forgotPassword(@RequestBody ForgotPasswordRequest otp){
+        authService.sendOtpToEmail(otp);
+        return ResponseEntity.ok(Map.of("message", "an OTP has been sent."));
+    }
 }

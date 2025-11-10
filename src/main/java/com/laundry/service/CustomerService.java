@@ -37,9 +37,15 @@ public class CustomerService {
         if (customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new PhoneNumberAlreadyExistException(request.getPhoneNumber());
         }
+        if (request.getEmail() !=null && !request.getEmail().isBlank()) {
+            if (customerRepo.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email already exists");
+            }
+        }
             Customer customer = new Customer();
             customer.setName(request.getName());
             customer.setPhoneNumber(request.getPhoneNumber());
+            customer.setEmail(request.getEmail());
             customerRepo.save(customer);
 
             CustomerAccount newAccount = new CustomerAccount();
