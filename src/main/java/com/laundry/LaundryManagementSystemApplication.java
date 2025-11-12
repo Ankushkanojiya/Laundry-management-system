@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @SpringBootApplication
-@EnableJpaRepositories("com.laundry.repo")
 @EntityScan("com.laundry.model")
 @EnableAsync
 public class LaundryManagementSystemApplication {

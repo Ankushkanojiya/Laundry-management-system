@@ -33,8 +33,14 @@ public class CustomerAuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String,String>> forgotPassword(@RequestBody ForgotPasswordRequest otp){
+    public ResponseEntity<Map<String,String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequest otp){
         authService.sendOtpToEmail(otp);
         return ResponseEntity.ok(Map.of("message", "an OTP has been sent."));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String,String>> verifyOtpAndSetPassword(@RequestBody @Valid VerifyOtpRequest verifyOtpRequest){
+        authService.verifyOtpAndSetPassword(verifyOtpRequest);
+        return ResponseEntity.ok(Map.of("message","Password change is successfull!!"));
     }
 }

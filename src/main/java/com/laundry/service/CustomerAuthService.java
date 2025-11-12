@@ -103,7 +103,7 @@ public class CustomerAuthService {
              throw new CustomerNotFoundException(0L);
          }
 
-         String customerId=String.valueOf(customer.getId());
+         Long customerId=customer.getId();
          Otp otp=generateOtp(customerId);
 
          otpRepo.save(otp);
@@ -111,8 +111,11 @@ public class CustomerAuthService {
          mail.sendMail(email,"Verification OTP - Laundry Management System",otp.getOtpCode());
          return Map.of("success", "OTP has been sent to your Email");
     }
-    private Otp generateOtp(String customerId){
-
+    private Otp generateOtp(Long customerId){
+        Otp existingOtp = otpRepo.findByCustomerId(customerId);
+        if (existingOtp != null) {
+            otpRepo.delete(existingOtp);
+        }
         int otpDigit=100000+ random.nextInt(900000);
         String otpCode=String.valueOf(otpDigit);
         Otp otp=new Otp();
@@ -121,5 +124,30 @@ public class CustomerAuthService {
         otp.setOtpCode(otpCode);
         otp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
         return otp;
+    }
+
+    public void verifyOtpAndSetPassword(VerifyOtpRequest request){
+
+        Customer customer = customerRepo.findByEmailIgnoreCase(request.getEmail())
+                .orElseThrow(() -> new CustomerNotFoundException(0L));
+
+        System.out.println("The OTP etails"+customer.getName()+customer.getEmail()+customer.getPhoneNumber());
+        Otp otp = otpRepo.findByCustomerIdAndOtpCode(customer.getId(), request.getOtpCode());
+        if (otp == null) {
+            throw new RuntimeException("Invalid or incorrect OTP code.");
+        }
+        System.out.println("The OTP details"+customer.getName()+customer.getEmail()+customer.getPhoneNumber());
+
+        if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            otpRepo.delete(otp);
+            throw new RuntimeException("OTP has expired. Please request a new one.");
+        }
+        CustomerLogin customerLogin=loginRepo.findByCustomer(customer)
+                .orElseThrow(()-> new CustomerLoginNotFoundException(0L));
+
+        customerLogin.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        loginRepo.save(customerLogin);
+        otpRepo.delete(otp);
+
     }
 }

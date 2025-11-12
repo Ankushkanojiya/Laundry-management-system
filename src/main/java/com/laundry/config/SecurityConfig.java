@@ -58,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/customer-auth/login",
                                 "/api/customer-auth/register",
+                                "api/customer-auth/forgot-password",
+                                "api/customer-auth/verify-otp",
                                 "/login",
                                 "/error",
                                 "/api/admin/auth/login",

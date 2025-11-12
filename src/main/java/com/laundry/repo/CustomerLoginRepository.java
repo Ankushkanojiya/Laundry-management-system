@@ -13,4 +13,5 @@ public interface CustomerLoginRepository extends JpaRepository<CustomerLogin,Lon
     Optional<CustomerLogin> findByPhoneNumber(String phoneNumber);
 
     Optional<CustomerLogin> findByCustomer(Customer customer);
+
 }
