@@ -2,6 +2,7 @@ package com.laundry.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,7 @@ public class Otp {
     @Id
     private String id;
 
-    private String customerId;
+    private Long customerId;
 
     private String otpCode;
 
