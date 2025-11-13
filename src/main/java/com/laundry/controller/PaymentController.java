@@ -1,9 +1,6 @@
 package com.laundry.controller;
 
-import com.laundry.dto.PaymentRequest;
-import com.laundry.dto.PaymentSummary;
-import com.laundry.dto.PaymentTransactionDTO;
-import com.laundry.dto.PendingPaymentDTO;
+import com.laundry.dto.*;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
@@ -58,14 +55,9 @@ public class PaymentController {
     }
 
     @GetMapping("/{customerId}/balance")
-    public ResponseEntity<Double> getCustomerBalance(@PathVariable Long customerId){
-        Customer customer=customerRepo.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    public ResponseEntity<BalanceStatusDTO> getCustomerBalance(@PathVariable Long customerId){
+        return ResponseEntity.ok(paymentService.getCustomerBalance(customerId));
 
-        CustomerAccount account=accountRepo.findByCustomer(customer)
-                .orElseThrow(()-> new RuntimeException("Account not found"));
-
-        return ResponseEntity.ok(account.getBalance());
     }
 //    @PostMapping("/customer")
 //    public ResponseEntity<PaymentTransactionDTO> recordCustomerPayment(@RequestBody PaymentRequest request,@RequestHeader("Authorization") String authHeader){

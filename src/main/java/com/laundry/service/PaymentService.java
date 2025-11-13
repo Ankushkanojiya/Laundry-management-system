@@ -1,13 +1,7 @@
 package com.laundry.service;
 
-import com.laundry.dto.PaymentRequest;
-import com.laundry.dto.PaymentSummary;
-import com.laundry.dto.PaymentTransactionDTO;
-import com.laundry.dto.PendingPaymentDTO;
-import com.laundry.exception.CustomerNotFoundException;
-import com.laundry.exception.InvalidPaymentAmountException;
-import com.laundry.exception.PaymentDetailsNotFound;
-import com.laundry.exception.PaymentExceedsBalanceException;
+import com.laundry.dto.*;
+import com.laundry.exception.*;
 import com.laundry.model.Customer;
 import com.laundry.model.CustomerAccount;
 import com.laundry.model.PaymentTransactions;
@@ -120,6 +114,12 @@ public class PaymentService {
 
         CustomerAccount account=accountRepo.findByCustomer(customer).orElseThrow(()-> new CustomerNotFoundException(request.getCustomerId()));
 
+        boolean isPending = pendingRepo.existsByAccountAndCustomerPaymentStatus(account, PendingCustomerPayment.PaymentStatus.PENDING);
+
+        if (isPending){
+            throw new PendingPaymentExistsException("You already have a payment pending for verification. Please wait for admin approval.");
+        }
+
         PendingCustomerPayment pending = PendingCustomerPayment.builder()
                 .account(account)
                 .amount(request.getAmount())
@@ -190,6 +190,19 @@ public class PaymentService {
             pendingList.add(new PaymentTransactionDTO(list));
         }
         return pendingList;
+    }
+
+    public BalanceStatusDTO getCustomerBalance(Long customerId){
+        Customer customer=customerRepo.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        CustomerAccount account=accountRepo.findByCustomer(customer)
+                .orElseThrow(()-> new RuntimeException("Account not found"));
+
+        double balance= account.getBalance();
+        boolean isPending=pendingRepo.existsByAccountAndCustomerPaymentStatus(account, PendingCustomerPayment.PaymentStatus.PENDING);
+
+        return new BalanceStatusDTO(balance,isPending);
     }
 
 }
