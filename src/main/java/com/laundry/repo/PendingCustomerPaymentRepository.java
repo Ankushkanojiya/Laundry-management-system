@@ -9,5 +9,8 @@ import java.util.List;
 public interface PendingCustomerPaymentRepository extends JpaRepository<PendingCustomerPayment,Long> {
     List<PendingCustomerPayment> findByAccount(CustomerAccount account);
 
+    boolean existsByAccountAndCustomerPaymentStatus(CustomerAccount account, PendingCustomerPayment.PaymentStatus status);
+
+
 
 }
