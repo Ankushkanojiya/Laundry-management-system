@@ -17,13 +17,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(Order.OrderStatus status);
 
-    void deleteByCustomer(Customer customer);
-
     @Query("Select COUNT(o) from Order o where o.status='PENDING' ")
     long countByStatus(Order.OrderStatus status);
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'COMPLETED' AND o.orderDate = :date")
-    double sumOfRevenueToday(@Param("date")LocalDate date);
+//    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'COMPLETED' AND o.orderDate = :date")
+//    double sumOfRevenueToday(@Param("date")LocalDate date);
 
     @Query("Select COALESCE(sum(o.totalAmount),0) from Order o where o.orderDate= :date")
     double sumOfBusinessRevenueToday(@Param("date") LocalDate date);
@@ -37,5 +35,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByCustomerAndStatusNot(@Param("customer") Customer customer, @Param("status") Order.OrderStatus orderStatus);
 
-
+    boolean existsByCustomerAndStatus(Customer customer, Order.OrderStatus orderStatus);
 }

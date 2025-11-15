@@ -1,5 +1,6 @@
 package com.laundry.repo;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.laundry.model.Customer;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,8 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
     Optional<Customer> findByEmailIgnoreCase(@Param("email") String email);
     boolean existsByEmail(String email);
     Customer findByEmail(String email);
+
+    List<Customer> findByIsActiveTrue();
+
+    Optional<Customer> findByIdAndIsActiveTrue(Long id);
 }

@@ -61,8 +61,11 @@ public class CustomerAuthService {
     public JwtResponse login(CustomerLoginRequest request){
         Customer customer=customerRepo.findByPhoneNumber(request.getPhoneNumber()).orElseThrow(()-> new RuntimeException("Invalid phone number"));
 
-        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(() -> new CustomerLoginNotFoundException(customer.getId()));
+        CustomerLogin login=loginRepo.findByCustomer(customer).orElseThrow(CustomerLoginNotFoundException::new);
 
+        if(!login.isActive()){
+            throw new CustomerLoginNotFoundException();
+        }
         if (!passwordEncoder.matches(request.getPassword(), login.getPassword())){
             throw new InvalidPhoneAndPassword();
         }
@@ -143,7 +146,7 @@ public class CustomerAuthService {
             throw new RuntimeException("OTP has expired. Please request a new one.");
         }
         CustomerLogin customerLogin=loginRepo.findByCustomer(customer)
-                .orElseThrow(()-> new CustomerLoginNotFoundException(0L));
+                .orElseThrow(CustomerLoginNotFoundException::new);
 
         customerLogin.setPassword(passwordEncoder.encode(request.getNewPassword()));
         loginRepo.save(customerLogin);

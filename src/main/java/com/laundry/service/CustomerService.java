@@ -2,14 +2,9 @@ package com.laundry.service;
 
 import com.laundry.dto.CustomerRequest;
 import com.laundry.dto.CustomerResponse;
-import com.laundry.exception.BalanceNotSettledException;
-import com.laundry.exception.CustomerNotFoundException;
-import com.laundry.exception.PhoneNumberAlreadyExistException;
-import com.laundry.model.Customer;
-import com.laundry.model.CustomerAccount;
-import com.laundry.repo.CustomerAccountRepository;
-import com.laundry.repo.CustomerRepository;
-import com.laundry.repo.OrderRepository;
+import com.laundry.exception.*;
+import com.laundry.model.*;
+import com.laundry.repo.*;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +25,8 @@ public class CustomerService {
     private final CustomerRepository customerRepo;
     private final CustomerAccountRepository accountRepo;
     private final OrderRepository orderRepo;
+    private final PendingCustomerPaymentRepository pendingRepo;
+    private final CustomerLoginRepository loginRepo;
 
 
 
@@ -68,7 +66,7 @@ public class CustomerService {
     }
 
     public List<CustomerResponse> getAllCustomers(){
-        List<Customer> customers=customerRepo.findAll();
+        List<Customer> customers=customerRepo.findByIsActiveTrue();
         List<CustomerResponse> customerResponses=new ArrayList<>();
 
         for(Customer customer : customers){
@@ -78,7 +76,7 @@ public class CustomerService {
     }
 
     public CustomerResponse getCustomerById(Long id) {
-        return customerRepo.findById(id)
+        return customerRepo.findByIdAndIsActiveTrue(id)
                 .map(this::mapToResponse)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
     }
@@ -103,12 +101,25 @@ public class CustomerService {
 
         if(account.getBalance() !=0.0) throw new BalanceNotSettledException(account.getId(), account.getBalance());
 
-        orderRepo.deleteByCustomer(customer);
-        System.out.println("Deleted the orders");
-        accountRepo.deleteByCustomer(customer);
-        System.out.println("Deleted the account");
-        customerRepo.deleteById(id);
-        System.out.println("finally customer deleted");
+        if(orderRepo.existsByCustomerAndStatus(customer, Order.OrderStatus.PENDING)){
+            throw new PendingOrderException();
+        }
+
+        if (pendingRepo.existsByAccountAndCustomerPaymentStatus(account, PendingCustomerPayment.PaymentStatus.PENDING)){
+            throw new PendingPaymentExistsException();
+        }
+
+        customer.setActive(false);
+        customerRepo.save(customer);
+
+        Optional<CustomerLogin> login=loginRepo.findByCustomer(customer);
+        login.ifPresent(customerLogin ->{
+            customerLogin.setActive(false);
+            loginRepo.save(customerLogin);
+
+        });
+
+        System.out.println("Customer: "+customer.getName()+ " has been deactivated");
     }
 
 }
