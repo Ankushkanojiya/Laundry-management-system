@@ -24,4 +24,6 @@ public class CustomerLogin {
     @OneToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    private boolean isActive=true;
 }

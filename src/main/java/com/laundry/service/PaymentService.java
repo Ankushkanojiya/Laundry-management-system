@@ -117,7 +117,7 @@ public class PaymentService {
         boolean isPending = pendingRepo.existsByAccountAndCustomerPaymentStatus(account, PendingCustomerPayment.PaymentStatus.PENDING);
 
         if (isPending){
-            throw new PendingPaymentExistsException("You already have a payment pending for verification. Please wait for admin approval.");
+            throw new PendingPaymentExistsException();
         }
 
         PendingCustomerPayment pending = PendingCustomerPayment.builder()
