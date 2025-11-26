@@ -26,4 +26,6 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
     List<Customer> findByIsActiveTrue();
 
     Optional<Customer> findByIdAndIsActiveTrue(Long id);
+
+    List<Customer> findByIsActiveFalse();
 }

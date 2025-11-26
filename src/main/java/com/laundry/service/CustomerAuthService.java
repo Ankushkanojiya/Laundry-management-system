@@ -17,8 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -152,5 +151,38 @@ public class CustomerAuthService {
         loginRepo.save(customerLogin);
         otpRepo.delete(otp);
 
+    }
+
+    public List<CustomerResponse> getInactiveCustomers() {
+        List<Customer> customer=customerRepo.findByIsActiveFalse();
+
+        List<CustomerResponse> responses=new ArrayList<>();
+
+        for(Customer cust:customer){
+            responses.add(mapToResponse(cust));
+        }
+        return responses;
+    }
+    private CustomerResponse mapToResponse(Customer customer) {
+        CustomerResponse response=new CustomerResponse();
+        response.setId(customer.getId());
+        response.setName(customer.getName());
+        response.setPhoneNumber(customer.getPhoneNumber());
+        response.setRegistrationDate(customer.getRegistrationDate());
+        return response;
+    }
+
+    public Map<String, String> activateCustomerById(Long id) {
+        Customer customer=customerRepo.findById(id)
+                .orElseThrow(()-> new CustomerNotFoundException(id));
+        Optional<CustomerLogin> custLogin=loginRepo.findByCustomer(customer);
+        custLogin.ifPresent(customerLogin -> {
+            customerLogin.setActive(true);
+            loginRepo.save(customerLogin);
+        });
+
+        customer.setActive(true);
+        customerRepo.save(customer);
+        return Map.of("Successful","Customer Activated");
     }
 }

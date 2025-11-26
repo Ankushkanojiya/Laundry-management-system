@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/api/customer-auth")
@@ -42,5 +43,15 @@ public class CustomerAuthController {
     public ResponseEntity<Map<String,String>> verifyOtpAndSetPassword(@RequestBody @Valid VerifyOtpRequest verifyOtpRequest){
         authService.verifyOtpAndSetPassword(verifyOtpRequest);
         return ResponseEntity.ok(Map.of("message","Password change is successfull!!"));
+    }
+
+    @GetMapping("/in-active")
+    public ResponseEntity<List<CustomerResponse>> getInactiveCustomers(){
+        return ResponseEntity.ok(authService.getInactiveCustomers());
+    }
+
+    @PutMapping("/in-active/{id}")
+    public ResponseEntity<Map<String,String>> activateCustomer(@PathVariable Long id){
+        return ResponseEntity.ok(authService.activateCustomerById(id));
     }
 }
